@@ -5,8 +5,10 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 
 const app: Application = express();
-
 dotenv.config();
+
+import fetchGlobalPlaylistData from './scripts/fetchGlobalPlaylistData';
+import { router as publicRouter } from './routes/publicSpotify';
 
 app.use(express.json());
 
@@ -27,5 +29,12 @@ app.use(cookieparser());
 app.get('/', (req: Request, res: Response) => {
   res.send('Express + TypeScript Server Working!');
 });
+
+app.get('/test', async (req: Request, res: Response) => {
+  fetchGlobalPlaylistData();
+  res.send('success!');
+});
+
+app.use('/public', publicRouter);
 
 app.listen(process.env.PORT);
