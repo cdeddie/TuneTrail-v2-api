@@ -35,6 +35,6 @@ app.get('/test', async (req: Request, res: Response) => {
   res.send('success!');
 });
 
-app.use('/public', publicRouter);
+app.use('/', publicRouter);
 
 app.listen(process.env.PORT);
