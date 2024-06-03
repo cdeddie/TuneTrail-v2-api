@@ -33,7 +33,6 @@ const fetchSpotifyRecommendations = async(req: Request) => {
 
     // example url: https://api.spotify.com/v1/recommendations?limit=25&seed_artists=5K4W6rqBFWDnAN6FQUkS6x&target_energy=40 - %2C represents ,
     const url = `https://api.spotify.com/v1/recommendations?${queryParams}`;
-    console.log(url);
     const response = await fetch(url, {
       method: 'GET',
       headers: {
@@ -45,8 +44,19 @@ const fetchSpotifyRecommendations = async(req: Request) => {
       throw new Error(`Fetch recommendations [Spotify API] failed with status: ${response.status}`);
     }
 
-    const rawData = await response.json();
-    return rawData;
+    const data = await response.json();
+
+    // We're looking into this very strongly
+    data.tracks = data.tracks.map((track: any) => {
+      const { album, available_markets, ...restOfTrack } = track;
+      const { available_markets: albumMarkets, ...restOfAlbum } = album;
+      return {
+        ...restOfTrack,
+        album: restOfAlbum
+      };
+    });
+
+    return data;
   } catch (error) {
     console.error('Error fetching search results:', error);
     throw error;

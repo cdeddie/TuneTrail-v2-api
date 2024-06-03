@@ -31,7 +31,7 @@ const fetchPlaylistTracks = async (playlistId: string) => {
     });
 
     return data;
-  } catch (error: unknown) {
+  } catch (error) {
     throw error;
   }
 };
