@@ -12,7 +12,7 @@ router.get('/top-50/:country', async (req: Request, res: Response) => {
     const country = req.params.country;
 
     const filePath = path.join(__dirname, '..', 'data', `top_50_${country}.json`);
-    console.log(filePath);
+
     const data = await fs.readFile(filePath, 'utf8');
     const jsonData = JSON.parse(data);
 

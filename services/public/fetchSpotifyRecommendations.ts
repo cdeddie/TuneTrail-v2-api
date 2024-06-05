@@ -17,7 +17,7 @@ const fetchSpotifyRecommendations = async(req: Request) => {
 
     const tags = decodeURIComponent(encodedTags as string);
     const recommendationString = decodeURIComponent(encodedRecTargets as string);
-    const seedKey = seedType === 'artist' ? 'seed_artists' : 'seed_tracks';
+    const seedKey = seedType === 'Artist' ? 'seed_artists' : 'seed_tracks';
     const token = await getAccessToken();
 
     let queryParams = new URLSearchParams([
@@ -33,6 +33,7 @@ const fetchSpotifyRecommendations = async(req: Request) => {
 
     // example url: https://api.spotify.com/v1/recommendations?limit=25&seed_artists=5K4W6rqBFWDnAN6FQUkS6x&target_energy=40 - %2C represents ,
     const url = `https://api.spotify.com/v1/recommendations?${queryParams}`;
+
     const response = await fetch(url, {
       method: 'GET',
       headers: {
