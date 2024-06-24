@@ -6,7 +6,7 @@ const fetchSpotifySearch = async (req: Request) => {
     const { query, type } = req.query;
     const token = await getAccessToken();
     
-    const url = `https://api.spotify.com/v1/search?q=${query}&type=${type}&market=AU&limit=10`;
+    const url = `https://api.spotify.com/v1/search?q=${query}&type=${type}&market=AU&limit=5`;
     const response = await fetch(url, {
       method: 'GET',
       headers: {

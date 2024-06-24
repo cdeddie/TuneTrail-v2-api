@@ -20,10 +20,11 @@ const fetchSpotifyRecommendations = async(req: Request) => {
     const seedKey = seedType === 'Artist' ? 'seed_artists' : 'seed_tracks';
     const token = await getAccessToken();
 
-    let queryParams = new URLSearchParams([
-      ["limit", limit as string],
-      [seedKey, tags]
-    ]);
+    const formattedTags = tags.replace(/[\[\]"]/g, '').split(',').join('%2C+');
+
+    let queryParams = new URLSearchParams();
+    queryParams.append("limit", limit as string);
+    queryParams.append(seedKey, formattedTags);
     
     const recommendationPairs = recommendationString.split(',');
     recommendationPairs.map(pair => {
