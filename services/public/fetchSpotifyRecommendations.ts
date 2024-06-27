@@ -1,11 +1,6 @@
 import { Request } from 'express';
 import { getAccessToken } from "../../utils/spotifyClientCredentials";
 
-type SliderItem = {
-  name: string;
-  value: number[];
-};
-
 // https://api.spotify.com/v1/recommendations
 // ?limit=50 [we will just have max at 50, and load them 10 at a time on frontend]
 // ?seed_artists= OR ?seed_tracks=
@@ -20,16 +15,14 @@ const fetchSpotifyRecommendations = async(req: Request) => {
     const seedKey = seedType === 'Artist' ? 'seed_artists' : 'seed_tracks';
     const token = await getAccessToken();
 
-    const formattedTags = tags.replace(/[\[\]"]/g, '').split(',').join('%2C+');
+    const formattedTags = tags.replace(/[\[\]"]/g, '').split(',').join('%2C');
 
-    let queryParams = new URLSearchParams();
-    queryParams.append("limit", limit as string);
-    queryParams.append(seedKey, formattedTags);
-    
+    let queryParams = `limit=${encodeURIComponent(limit as string)}&${seedKey}=${formattedTags}`;
+
     const recommendationPairs = recommendationString.split(',');
-    recommendationPairs.map(pair => {
+    recommendationPairs.forEach(pair => {
       const [word, number] = pair.split('=');
-      if (number) queryParams.append(`target_${word}`, number);
+      if (number) queryParams += `&target_${word}=${encodeURIComponent(number)}`;
     });
 
     // example url: https://api.spotify.com/v1/recommendations?limit=25&seed_artists=5K4W6rqBFWDnAN6FQUkS6x&target_energy=40 - %2C represents ,
