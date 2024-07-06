@@ -1,10 +1,10 @@
 import { Request } from 'express';
-import { getAccessToken } from '../../utils/spotifyClientCredentials';
+import { getClientAccessToken } from '../../utils/spotifyClientCredentials';
 
 const fetchSpotifySearch = async (req: Request) => {
   try {
     const { query, type } = req.query;
-    const token = await getAccessToken();
+    const token = await getClientAccessToken();
     
     const url = `https://api.spotify.com/v1/search?q=${query}&type=${type}&market=AU&limit=5`;
     const response = await fetch(url, {

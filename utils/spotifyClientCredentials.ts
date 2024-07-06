@@ -1,16 +1,12 @@
+import { TokenResponse } from "../types/spotifyTokenResponseType";
+
 const clientId = process.env.CLIENT_ID;
 const clientSecret = process.env.CLIENT_SECRET;
 
 let accessToken: string = "";
 let tokenExpiry: number | null = null;
 
-interface TokenResponse {
-  access_token: string,     // Access token that can be provided in subsequent calls
-  token_type: string,       // How the access token may be used, always "Bearer"
-  expires_in: number        // The time period (in seconds) for which the token is valid
-}
-
-export const getAccessToken = async (): Promise<string> => {
+export const getClientAccessToken = async (): Promise<string> => {
   try {
     if (accessToken && tokenExpiry && Date.now() < tokenExpiry) {
       return accessToken;
@@ -31,9 +27,10 @@ export const getAccessToken = async (): Promise<string> => {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    const data = await response.json() as TokenResponse;
-    accessToken = data.access_token;
-    tokenExpiry = Date.now() + (data.expires_in - 60) * 1000;
+    const token_data = await response.json() as TokenResponse;
+    console.log(token_data)
+    accessToken = token_data.access_token;
+    tokenExpiry = Date.now() + (token_data.expires_in - 60) * 1000;
     return accessToken;
   } catch (error: unknown) {
     if (error instanceof Error && 'response' in error) {

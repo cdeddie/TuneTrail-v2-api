@@ -9,6 +9,7 @@ dotenv.config();
 
 import fetchGlobalPlaylistData from './scripts/fetchGlobalPlaylistData';
 import { router as publicRouter } from './routes/publicSpotify';
+import { router as authRouter } from './routes/auth';
 
 app.use(express.json());
 
@@ -36,5 +37,6 @@ app.get('/test', async (req: Request, res: Response) => {
 });
 
 app.use('/', publicRouter);
+app.use('/auth', authRouter);
 
 app.listen(process.env.PORT);

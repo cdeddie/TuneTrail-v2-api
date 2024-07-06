@@ -1,8 +1,8 @@
-import { getAccessToken } from '../../utils/spotifyClientCredentials';
+import { getClientAccessToken } from '../../utils/spotifyClientCredentials';
 
 const fetchPlaylistTracks = async (playlistId: string) => {
   try {
-    const token: string = await getAccessToken();
+    const token: string = await getClientAccessToken();
 
     const response = await fetch(`https://api.spotify.com/v1/playlists/${playlistId}/tracks`, {
       headers: {

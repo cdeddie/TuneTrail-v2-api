@@ -1,5 +1,5 @@
 import { Request } from 'express';
-import { getAccessToken } from "../../utils/spotifyClientCredentials";
+import { getClientAccessToken } from "../../utils/spotifyClientCredentials";
 
 // https://api.spotify.com/v1/recommendations
 // ?limit=50 [we will just have max at 50, and load them 10 at a time on frontend]
@@ -13,7 +13,7 @@ const fetchSpotifyRecommendations = async(req: Request) => {
     const tags = decodeURIComponent(encodedTags as string);
     const recommendationString = decodeURIComponent(encodedRecTargets as string);
     const seedKey = seedType === 'Artist' ? 'seed_artists' : 'seed_tracks';
-    const token = await getAccessToken();
+    const token = await getClientAccessToken();
 
     const formattedTags = tags.replace(/[\[\]"]/g, '').split(',').join('%2C');
 
