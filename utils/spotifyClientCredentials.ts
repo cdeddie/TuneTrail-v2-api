@@ -28,7 +28,6 @@ export const getClientAccessToken = async (): Promise<string> => {
     }
 
     const token_data = await response.json() as TokenResponse;
-    console.log(token_data)
     accessToken = token_data.access_token;
     tokenExpiry = Date.now() + (token_data.expires_in - 60) * 1000;
     return accessToken;

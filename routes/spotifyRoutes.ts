@@ -4,6 +4,7 @@ import path from 'path';
 
 import fetchSpotifySearch from '../services/public/fetchSpotifySearch';
 import fetchSpotifyRecommendations from '../services/public/fetchSpotifyRecommendations';
+import fetchSpotifyRecommendationsPrivate from '../services/private/fetchSpotifyRecommendationsPrivate';
 
 const router = express.Router();
 
@@ -22,7 +23,7 @@ router.get('/top-50/:country', async (req: Request, res: Response) => {
   }
 });
 
-router.get('/public-search', async(req: Request, res: Response) => {
+router.get('/search', async(req: Request, res: Response) => {
   try {
     const response = await fetchSpotifySearch(req);
 
@@ -33,11 +34,16 @@ router.get('/public-search', async(req: Request, res: Response) => {
   }
 });
 
-router.get('/public-recommendations', async(req: Request, res: Response) => {
+router.get('/recommendations', async(req: Request, res: Response) => {
   try {
-    const response = await fetchSpotifyRecommendations(req);
+    let recommendations;
+    if (req.session.is_logged_in) {
+      recommendations = await fetchSpotifyRecommendationsPrivate(req);
+    } else {
+      recommendations = await fetchSpotifyRecommendations(req);
+    }
 
-    return res.status(200).send(response);
+    return res.status(200).send(recommendations);
   } catch (error) {
     console.log(error);
     return res.status(500).send(error);
