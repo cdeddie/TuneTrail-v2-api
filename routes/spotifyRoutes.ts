@@ -5,6 +5,7 @@ import path from 'path';
 import fetchSpotifySearch from '../services/public/fetchSpotifySearch';
 import fetchSpotifyRecommendations from '../services/public/fetchSpotifyRecommendations';
 import fetchSpotifyRecommendationsPrivate from '../services/private/fetchSpotifyRecommendationsPrivate';
+import refreshTokenIfNeeded from '../middleware/refreshTokenIfNeeded';
 
 const router = express.Router();
 
@@ -34,7 +35,7 @@ router.get('/search', async(req: Request, res: Response) => {
   }
 });
 
-router.get('/recommendations', async(req: Request, res: Response) => {
+router.get('/recommendations', refreshTokenIfNeeded, async(req: Request, res: Response) => {
   try {
     let recommendations;
     if (req.session.is_logged_in) {
