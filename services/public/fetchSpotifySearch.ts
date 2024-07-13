@@ -1,4 +1,4 @@
-import { Request } from 'express';
+import { Request }              from 'express';
 import { getClientAccessToken } from '../../utils/spotifyClientCredentials';
 
 const fetchSpotifySearch = async (req: Request) => {

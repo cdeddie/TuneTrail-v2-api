@@ -1,4 +1,4 @@
-import { Request } from 'express';
+import { Request }              from 'express';
 import { getClientAccessToken } from "../../utils/spotifyClientCredentials";
 
 // https://api.spotify.com/v1/recommendations

@@ -1,5 +1,5 @@
-import querystring from 'querystring';
-import { Request, Response, NextFunction } from 'express';  
+import querystring                          from 'querystring';
+import { Request, Response, NextFunction }  from 'express';  
 
 const { CLIENT_ID: clientId, CLIENT_SECRET: clientSecret } = process.env;
 

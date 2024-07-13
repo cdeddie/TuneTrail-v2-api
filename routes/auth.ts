@@ -1,11 +1,10 @@
 import express, { Router, Request, Response } from 'express';
-import axios from 'axios';
-import querystring from 'querystring';
-import crypto from 'crypto';
-import { TokenResponse } from '../types/spotifyTokenResponseType';
-import fetchSpotifyRecommendations from '../services/public/fetchSpotifyRecommendations';
-import { fetchSpotifyToken } from '../utils/fetchSpotifyToken';
-import { fetchSpotifyUser } from '../utils/fetchSpotifyUser';
+import querystring                            from 'querystring';
+import crypto                                 from 'crypto';
+
+import { TokenResponse }                      from '../types/spotifyTokenResponseType';
+import { fetchSpotifyToken }                  from '../utils/fetchSpotifyToken';
+import { fetchSpotifyUser }                   from '../utils/fetchSpotifyUser';
 
 const {
   CLIENT_ID: clientId,
@@ -80,8 +79,8 @@ router.get('/callback', async (req: Request, res: Response) => {
     updateSession(req, tokenResponse, userResponse);
 
     const baseUrl = process.env.NODE_ENV === 'development'
-      ? 'http://localhost:5173'
-      : 'https://tunetrail.site';
+      ? 'http://localhost:5173/discover'
+      : 'https://tunetrail.site/discover';
 
     res.redirect(baseUrl);
   } catch (error) {

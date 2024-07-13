@@ -1,11 +1,11 @@
 import express, { Request, Response } from 'express';
-import fs from 'fs/promises';
-import path from 'path';
+import fs                             from 'fs/promises';
+import path                           from 'path';
 
-import fetchSpotifySearch from '../services/public/fetchSpotifySearch';
-import fetchSpotifyRecommendations from '../services/public/fetchSpotifyRecommendations';
+import fetchSpotifySearch                 from '../services/public/fetchSpotifySearch';
+import fetchSpotifyRecommendations        from '../services/public/fetchSpotifyRecommendations';
 import fetchSpotifyRecommendationsPrivate from '../services/private/fetchSpotifyRecommendationsPrivate';
-import refreshTokenIfNeeded from '../middleware/refreshTokenIfNeeded';
+import refreshTokenIfNeeded               from '../middleware/refreshTokenIfNeeded';
 
 const router = express.Router();
 
