@@ -11,7 +11,7 @@ const fetchPlaylistTracks = async (playlistId: string) => {
     });
 
     if (!response.ok) {
-      throw new Error(`Fetch playlist tracks failed with status: ${response.status}`);
+      throw new Error(`Fetch playlist tracks failed with status: ${response.status} (${response.statusText})`);
     }
 
     const data = await response.json();

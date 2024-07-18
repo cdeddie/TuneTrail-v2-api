@@ -1,6 +1,6 @@
 import { Request } from 'express';
 
-interface TrackPreview {
+type TrackPreview = {
   id: string;
   url: string;
 }

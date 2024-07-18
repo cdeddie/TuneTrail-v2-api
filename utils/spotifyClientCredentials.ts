@@ -1,4 +1,4 @@
-import { TokenResponse } from "../types/spotifyTokenResponseType";
+import { TokenResponse }  from "../types/spotifyTokenResponseType";
 
 const clientId = process.env.CLIENT_ID;
 const clientSecret = process.env.CLIENT_SECRET;
@@ -24,7 +24,7 @@ export const getClientAccessToken = async (): Promise<string> => {
     });
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw new Error(`HTTP error! status: ${response.status} (${response.statusText})`);
     }
 
     const token_data = await response.json() as TokenResponse;

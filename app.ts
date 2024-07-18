@@ -1,15 +1,15 @@
-import express, { Application, Request, Response } from 'express';
-import session from 'express-session';
-import cookieparser from 'cookie-parser';
-import cors from 'cors';
-import dotenv from 'dotenv';
+import express, { Application, Request, Response }  from 'express';
+import session                                      from 'express-session';
+import cookieparser                                 from 'cookie-parser';
+import cors                                         from 'cors';
+import dotenv                                       from 'dotenv';
 
 const app: Application = express();
 dotenv.config();
 
-import fetchGlobalPlaylistData from './scripts/fetchGlobalPlaylistData';
-import { router as spotifyRouter } from './routes/spotifyRoutes';
-import { router as authRouter } from './routes/auth';
+import fetchGlobalPlaylistData      from './scripts/fetchGlobalPlaylistData';
+import { router as spotifyRouter }  from './routes/spotifyRoutes';
+import { router as authRouter }     from './routes/auth';
 
 app.use(express.json());
 

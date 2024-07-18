@@ -1,4 +1,4 @@
-export interface TokenResponse {
+export type TokenResponse = {
   access_token: string,     // Access token that can be provided in subsequent calls
   token_type: string,       // How the access token may be used, always "Bearer"
   expires_in: number        // The time period (in seconds) for which the token is valid
