@@ -12,7 +12,7 @@ async function fetchAndProcessPlaylist(playlistId: string): Promise<Album[]> {
     const playlistData: any = await fetchPlaylistTracks(playlistId);
     
     const albums: Album[] = playlistData.items.map((item: any) => ({
-      image: item.track.album.images[1].url,
+      image: item.track.album.images[0].url,
       link: item.track.album.uri
     }));
 
@@ -24,14 +24,6 @@ async function fetchAndProcessPlaylist(playlistId: string): Promise<Album[]> {
 }
 
 // Usage
-const playlistId = '1534IsiGUiLaOyS8HSwD3D';
-
-fetchAndProcessPlaylist(playlistId)
-  .then(albums => {
-    console.log(`Processed albums (${albums.length}):`, albums);
-  })
-  .catch(error => {
-    console.error('Script execution failed:', error);
-  });
+// const playlistId = '1534IsiGUiLaOyS8HSwD3D';
 
 export default fetchAndProcessPlaylist;
