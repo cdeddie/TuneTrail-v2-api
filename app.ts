@@ -26,7 +26,7 @@ app.use(cors({
 
 app.use(cookieparser());
 
-app.use('/', spotifyRouter);
-app.use('/auth', authRouter);
+app.use('/api/', spotifyRouter);
+app.use('/api/auth', authRouter);
 
 app.listen(process.env.PORT);
