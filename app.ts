@@ -7,10 +7,8 @@ import dotenv                                       from 'dotenv';
 const app: Application = express();
 dotenv.config();
 
-import fetchGlobalPlaylistData      from './scripts/fetchGlobalPlaylistData';
 import { router as spotifyRouter }  from './routes/spotifyRoutes';
 import { router as authRouter }     from './routes/auth';
-import fetchAndProcessPlaylist      from './scripts/fetchPlaylistTrackCover';
 
 app.use(express.json());
 
@@ -27,23 +25,6 @@ app.use(cors({
 }));
 
 app.use(cookieparser());
-
-app.get('/', (req: Request, res: Response) => {
-  res.send('Express + TypeScript Server Working!');
-});
-
-app.get('/test', async (req: Request, res: Response) => {
-  // fetchGlobalPlaylistData();
-  // res.send('success!');
-  // try {
-  //   const response = await fetchAndProcessPlaylist('1534IsiGUiLaOyS8HSwD3D');
-
-  //   return res.status(200).send(response);
-  // } catch (error) {
-  //   console.log(error);
-  //   return res.status(500).send(error);
-  // }
-});
 
 app.use('/', spotifyRouter);
 app.use('/auth', authRouter);
