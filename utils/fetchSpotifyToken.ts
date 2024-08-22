@@ -12,7 +12,7 @@ const {
 const fetchSpotifyToken = async(code: string | null): Promise<TokenResponse> => {
   const params = new URLSearchParams({
     code: code || '',
-    redirect_uri: redirectUri || 'http://localhost:3443/auth/callback',
+    redirect_uri: redirectUri || 'http://localhost:3443/api/auth/callback',
     grant_type: 'authorization_code'
   });
 
