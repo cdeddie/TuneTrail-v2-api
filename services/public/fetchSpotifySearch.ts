@@ -1,7 +1,14 @@
 import { Request }              from 'express';
 import { getClientAccessToken } from '../../utils/spotifyClientCredentials';
+import { globalRateLimiter }    from '../../middleware/rateLimiter';
 
-const fetchSpotifySearch = async (req: Request) => {
+const fetchSpotifySearch = async (req: Request, ip: string) => {
+  const { allowed, warning } = globalRateLimiter.checkLimit(ip);
+
+  if (!allowed) {
+    throw new Error('Rate limit exceeded');
+  }
+
   try {
     const { query, type } = req.query;
     const token = await getClientAccessToken();
@@ -20,7 +27,7 @@ const fetchSpotifySearch = async (req: Request) => {
 
     const rawData = await response.json();
 
-    return rawData;
+    return { data: rawData, warning };
   } catch (error) {
     console.error('Error fetching search results:', error);
     throw error;

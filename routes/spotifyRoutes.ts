@@ -25,28 +25,57 @@ router.get('/top-50/:country', async (req: Request, res: Response) => {
 });
 
 router.get('/search', async(req: Request, res: Response) => {
-  try {
-    const response = await fetchSpotifySearch(req);
+  const ip = req.ip;
 
-    return res.status(200).send(response);
+  if (!ip) {
+    console.error('Unable to determine client IP address');
+    return res.status(500).send('Internal Server Error');
+  }
+
+  try {
+    const { data, warning } = await fetchSpotifySearch(req, ip);
+
+    if (warning) {
+      res.setHeader('X-Rate-Limit-Warning', 'True');
+    }
+
+    return res.status(200).send(data);
   } catch (error) {
-    console.log(error);
+    if (error instanceof Error && error.message === 'Rate limit exceeded') {
+      return res.status(429).send({ error: error.message });
+    }
+    console.error(error);
     return res.status(500).send(error);
   }
 });
 
 router.get('/recommendations', refreshTokenIfNeeded, async(req: Request, res: Response) => {
+  const ip = req.ip;
+
+  if (!ip) {
+    console.error('Unable to determine client IP address');
+    return res.status(500).send('Internal Server Error');
+  }
+
   try {
     let recommendations;
     if (req.session.is_logged_in) {
       recommendations = await fetchSpotifyRecommendationsPrivate(req);
     } else {
-      recommendations = await fetchSpotifyRecommendations(req);
-    }
+      const { data, warning } = await fetchSpotifyRecommendations(req, ip);
+      
+      if (warning) {
+        res.setHeader('X-Rate-Limit-Warning', 'True');
+      }
 
+      recommendations = data;
+    }
     return res.status(200).send(recommendations);
   } catch (error) {
-    console.log(error);
+    if (error instanceof Error && error.message === 'Rate limit exceeded') {
+      return res.status(429).send({ error: error.message });
+    }
+    console.error(error);
     return res.status(500).send(error);
   }
 });

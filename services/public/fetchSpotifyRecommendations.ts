@@ -1,12 +1,19 @@
 import { Request }              from 'express';
 import { getClientAccessToken } from "../../utils/spotifyClientCredentials";
+import { globalRateLimiter }    from '../../middleware/rateLimiter';
 
 // https://api.spotify.com/v1/recommendations
 // ?limit=50 [we will just have max at 50, and load them 10 at a time on frontend]
 // ?seed_artists= OR ?seed_tracks=
 // for each recommendationTargets (which will be delivered as a string of all filters seperated by comma, i.e. acousticness=37,energy=100)
 
-const fetchSpotifyRecommendations = async(req: Request) => {
+const fetchSpotifyRecommendations = async(req: Request, ip: string) => {
+  const { allowed, warning } = globalRateLimiter.checkLimit(ip);
+
+  if (!allowed) {
+    throw new Error('Rate limit exceeded');
+  }
+
   try {
     const { limit, tags: encodedTags, recTargets: encodedRecTargets, seedType } = req.query;
 
@@ -51,7 +58,7 @@ const fetchSpotifyRecommendations = async(req: Request) => {
       };
     });
 
-    return data;
+    return { data, warning };
   } catch (error) {
     console.error('Error fetching search results:', error);
     throw error;
