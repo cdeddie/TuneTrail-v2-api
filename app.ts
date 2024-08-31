@@ -11,20 +11,25 @@ import { router as spotifyRouter }  from './routes/spotifyRoutes';
 import { router as authRouter }     from './routes/auth';
 
 app.use(express.json());
+app.use(cookieparser());
+
+app.enable('trust proxy');
 
 app.use(session({
   secret: process.env.SESSION_SECRET!,
   resave: false,
-  saveUninitialized: true,
-  cookie: { secure: process.env.NODE_ENV === 'production'}
+  saveUninitialized: false,
+  cookie: { 
+    secure: process.env.NODE_ENV === 'production',
+    httpOnly: true
+  }
 }));
 
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' ? 'https://tunetrail.site' : true,
   credentials: true,
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
-
-app.use(cookieparser());
 
 app.use('/api/', spotifyRouter);
 app.use('/api/auth', authRouter);

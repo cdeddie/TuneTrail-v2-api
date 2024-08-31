@@ -128,18 +128,21 @@ router.get('/refresh_token', async (req: Request, res: Response) => {
   }
 });
 
-router.get('/status', (req, res) => {
-  res.json({ isLoggedIn: !!req.session.is_logged_in });
+router.get('/status', (req: Request, res: Response) => {
+  res.json({ 
+    session: req.session,
+    isLoggedIn: !!req.session.is_logged_in
+ });
 });
 
-router.get('/logout', (req, res) => {
+router.get('/logout', (req: Request, res: Response) => {
   req.session.destroy(err => {
     if (err) {
       console.error('Error during logout:', err.message);
       res.status(500).send('Error during logout');
     }
     res.status(200).send('Logged out');
-    //res.redirect('localhost:5173/'); // PROD CHECK
+    res.redirect('https://tunetrail.site'); // PROD CHECK
   })
 });
 
