@@ -141,7 +141,6 @@ router.get('/logout', (req: Request, res: Response) => {
       console.error('Error during logout:', err.message);
       res.status(500).send('Error during logout');
     }
-    res.status(200).send('Logged out');
     res.redirect('https://tunetrail.site'); // PROD CHECK
   })
 });
