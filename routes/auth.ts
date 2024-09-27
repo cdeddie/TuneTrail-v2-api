@@ -3,6 +3,7 @@ import querystring                            from 'querystring';
 import crypto                                 from 'crypto';
 
 import { TokenResponse }                      from '../types/spotifyTokenResponseType';
+import { SpotifyUserResponse }                from '../types/spotifyUserResponse';
 import { fetchSpotifyToken }                  from '../utils/fetchSpotifyToken';
 import { fetchSpotifyUser }                   from '../utils/fetchSpotifyUser';
 
@@ -20,7 +21,7 @@ declare module 'express-session' {
     refresh_token?: string;
     is_logged_in?: boolean;
     token_expiry?: number;
-    spotify_id?: string;
+    spotify_info?: SpotifyUserResponse
   }
 }
 
@@ -34,7 +35,10 @@ const generateRandomString = (length: number) => {
 };
 
 router.get('/login', (req: Request, res: Response) => {
-  const state = generateRandomString(16);
+  const state = JSON.stringify({
+    state: generateRandomString(16),
+    currentUrl: req.query.redirectUrl,
+  });
   res.cookie(stateKey as string, state);
 
   const redirectUrl = 'https://accounts.spotify.com/authorize?' +
@@ -50,12 +54,12 @@ router.get('/login', (req: Request, res: Response) => {
 });
 
 // Helper function to update session on /callback
-const updateSession = (req: Request, tokenResponse: TokenResponse, spotifyId: string): void => {
+const updateSession = (req: Request, tokenResponse: TokenResponse, spotifyData: SpotifyUserResponse): void => {
   req.session.access_token = tokenResponse.access_token;
   req.session.refresh_token = tokenResponse.refresh_token;
   req.session.is_logged_in = true;
   req.session.token_expiry = Date.now() + (tokenResponse.expires_in - 60) * 1000;
-  req.session.spotify_id = spotifyId;
+  req.session.spotify_info = spotifyData;
 };
 
 // Exchange code for access token, requests refresh and access tokens after checking state param
@@ -72,16 +76,19 @@ router.get('/callback', async (req: Request, res: Response) => {
 
   res.clearCookie(stateKey as string);
 
+  const parsedState = JSON.parse(state);
+
   try {
     const tokenResponse = await fetchSpotifyToken(code);
     const userResponse = await fetchSpotifyUser(tokenResponse.access_token);
 
     updateSession(req, tokenResponse, userResponse);
 
-    const baseUrl = process.env.NODE_ENV === 'development'
+    let baseUrl = process.env.NODE_ENV === 'development'
       ? 'http://localhost:5173/discover'
       : 'https://tunetrail.site/discover';
 
+    if (parsedState.currentUrl) baseUrl = parsedState.currentUrl;
     res.redirect(baseUrl);
   } catch (error) {
     console.error('Error during authentication callback from Spotify:', (error as Error).message);
@@ -90,11 +97,11 @@ router.get('/callback', async (req: Request, res: Response) => {
 });
 
 router.get('/refresh_token', async (req: Request, res: Response) => {
-  const refresh_token = req.session.refresh_token;
+  const refreshToken = req.session.refresh_token;
 
   const params = new URLSearchParams({
     grant_type: 'refresh_token',
-    refresh_token: refresh_token as string
+    refresh_token: refreshToken as string
   });
 
   const authOptions = {
@@ -111,11 +118,11 @@ router.get('/refresh_token', async (req: Request, res: Response) => {
     
     if (response.ok) {
       const data: TokenResponse = await response.json();
-      const { access_token, refresh_token: new_refresh_token } = data;
+      const { access_token, refresh_token: newRefreshToken } = data;
 
       req.session.access_token = access_token;
-      if (new_refresh_token) {
-        req.session.refresh_token = new_refresh_token;
+      if (newRefreshToken) {
+        req.session.refresh_token = newRefreshToken;
       }
 
       res.json({ access_token });

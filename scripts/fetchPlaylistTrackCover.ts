@@ -7,7 +7,7 @@ type Album = {
   link: string;
 }
 
-async function fetchAndProcessPlaylist(playlistId: string): Promise<Album[]> {
+export const fetchAndProcessPlaylist = async (playlistId: string): Promise<Album[]> => {
   try {
     const playlistData: any = await fetchPlaylistTracks(playlistId);
     
@@ -25,5 +25,3 @@ async function fetchAndProcessPlaylist(playlistId: string): Promise<Album[]> {
 
 // Usage
 // const playlistId = '1534IsiGUiLaOyS8HSwD3D';
-
-export default fetchAndProcessPlaylist;
