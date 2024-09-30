@@ -138,7 +138,7 @@ router.get('/refresh_token', async (req: Request, res: Response) => {
 router.get('/status', (req: Request, res: Response) => {
   res.json({ 
     session: req.session,
-    isLoggedIn: !!req.session.is_logged_in
+    isLoggedIn: !!req.session.is_logged_in,
  });
 });
 

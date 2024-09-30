@@ -26,7 +26,18 @@ app.use(session({
 }));
 
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production' ? 'https://tunetrail.site' : true,
+  origin: (origin, callback) => {
+    const allowedOrigins = [
+      'https://tunetrail.site', 
+      'https://staging.tunetrail.site'
+    ];
+
+    if (allowedOrigins.indexOf(origin!) !== -1 || !origin) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
