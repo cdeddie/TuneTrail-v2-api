@@ -1,26 +1,22 @@
+import { Image, ExternalUrls } from "./spotifyCommonTypes"
+
 export type SpotifyUserResponse = {
-  country: string
-  display_name: string
-  email: string
+  country: string;
+  display_name: string;
+  email: string;
   explicit_content: {
-    filter_enabled: boolean
-    filter_locked: boolean
-  }
-  external_urls: {
-    spotify: string
-  }
+    filter_enabled: boolean;
+    filter_locked: boolean;
+  };
+  external_urls: ExternalUrls;
   followers: {
-    href: string
-    total: number
-  }
-  href: string
-  id: string
-  images: Array<{
-    url: string
-    height: number
-    width: number
-  }>
-  product: string
-  type: string
-  uri: string
-}
+    href: string;
+    total: number;
+  };
+  href: string;
+  id: string;
+  images: Image[];
+  product: string;
+  type: string;
+  uri: string;
+};

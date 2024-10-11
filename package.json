@@ -3,20 +3,23 @@
   "version": "1.1.0",
   "scripts": {
     "build": "tsc",
-    "dev": "nodemon app.ts"
+    "dev": "nodemon app.ts",
+    "test": "jest"
   },
   "license": "ISC",
-  "author": "Edwin Chen-Desailly <edwinchendesailly@gmail.com> (https://cdeddie.work)",
+  "author": "https://cdeddie.work",
   "devDependencies": {
     "@types/cookie-parser": "^1.4.7",
     "@types/cors": "^2.8.17",
     "@types/express-session": "^1.18.0",
+    "@types/jest": "^29.5.13",
+    "jest": "^29.7.0",
     "nodemon": "^3.1.0",
+    "ts-jest": "^29.2.5",
     "ts-node": "^10.9.2",
     "typescript": "^5.4.5"
   },
   "dependencies": {
-    "axios": "^1.7.2",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",

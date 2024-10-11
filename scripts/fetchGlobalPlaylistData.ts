@@ -8,8 +8,8 @@ import fetchPlaylistTracks from '../services/public/fetchPlaylistTracks';
 
 const playlistData = [
   ['global', '37i9dQZEVXbMDoHDwVN2tF'],
-  ['united_States', '37i9dQZEVXbLRQDuF5jeBp'],
-  ['united_Kingdom', '37i9dQZEVXbLnolsZ8PSNw'],
+  ['united_states', '37i9dQZEVXbLRQDuF5jeBp'],
+  ['united_kingdom', '37i9dQZEVXbLnolsZ8PSNw'],
   ['mexico', '37i9dQZEVXbO3qyFxbkOE1'],
   ['brazil', '37i9dQZEVXbMXbN3EUUhlg'],
   ['germany', '37i9dQZEVXbJiZcmkrIHGU'],

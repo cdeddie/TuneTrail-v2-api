@@ -2,8 +2,9 @@ import express, { Router, Request, Response } from 'express';
 import querystring                            from 'querystring';
 import crypto                                 from 'crypto';
 
-import { TokenResponse }                      from '../types/spotifyTokenResponseType';
+import { TokenResponse }                      from '../types/spotifyTokenResponse';
 import { SpotifyUserResponse }                from '../types/spotifyUserResponse';
+import { CallbackQueryParams }                from '../types/callbackQueryParams';
 import { fetchSpotifyToken }                  from '../utils/fetchSpotifyToken';
 import { fetchSpotifyUser }                   from '../utils/fetchSpotifyUser';
 
@@ -16,7 +17,7 @@ const {
 } = process.env;
 
 declare module 'express-session' {
-  interface Session {
+  interface SessionData {
     access_token?: string;
     refresh_token?: string;
     is_logged_in?: boolean;
@@ -63,9 +64,9 @@ const updateSession = (req: Request, tokenResponse: TokenResponse, spotifyData: 
 };
 
 // Exchange code for access token, requests refresh and access tokens after checking state param
-router.get('/callback', async (req: Request, res: Response) => {
-  const code = req.query.code as string || null;
-  const state = req.query.state as string || null;
+router.get('/callback', async (req: Request<{}, {}, {}, CallbackQueryParams>, res: Response) => {
+  const code = req.query.code || null;
+  const state = req.query.state || null;
   const storedState = req.cookies ? req.cookies[stateKey as string] : null;
 
   if (state === null || state !== storedState) {
@@ -137,9 +138,9 @@ router.get('/refresh_token', async (req: Request, res: Response) => {
 
 router.get('/status', (req: Request, res: Response) => {
   res.json({ 
-    session: req.session,
-    isLoggedIn: !!req.session.is_logged_in,
- });
+    spotifyInfo: req.session.spotify_info || null,
+    isLoggedIn: !!req.session?.is_logged_in,
+  });
 });
 
 router.get('/logout', (req: Request, res: Response) => {

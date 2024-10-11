@@ -1,4 +1,4 @@
-import { TokenResponse }  from "../types/spotifyTokenResponseType";
+import { TokenResponse }  from "../types/spotifyTokenResponse";
 
 const clientId = process.env.CLIENT_ID;
 const clientSecret = process.env.CLIENT_SECRET;

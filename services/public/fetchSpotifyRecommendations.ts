@@ -1,13 +1,14 @@
-import { Request }              from 'express';
-import { getClientAccessToken } from "../../utils/spotifyClientCredentials";
-import { globalRateLimiter }    from '../../middleware/rateLimiter';
+import { Request }                        from 'express';
+import { globalRateLimiter }              from '../../middleware/rateLimiter';
+import { getClientAccessToken }           from "../../utils/spotifyClientCredentials";
+import { SpotifyRecommendationResponse }  from '../../types/spotifyRecommendationResponse';
 
 // https://api.spotify.com/v1/recommendations
 // ?limit=50 [we will just have max at 50, and load them 10 at a time on frontend]
 // ?seed_artists= OR ?seed_tracks=
 // for each recommendationTargets (which will be delivered as a string of all filters seperated by comma, i.e. acousticness=37,energy=100)
 
-const fetchSpotifyRecommendations = async(req: Request, ip: string) => {
+const fetchSpotifyRecommendations = async(req: Request, ip: string): Promise<{ data: SpotifyRecommendationResponse, warning?: boolean }> => {
   const { allowed, warning } = globalRateLimiter.checkLimit(ip);
 
   if (!allowed) {

@@ -1,7 +1,7 @@
 // This function will fetch the spotify token, BUT it will return it as a TokenResponse type (in /types)
 // Not to be confused with the getClientAccessToken, which returns a direct string (the access token itself)
 
-import { TokenResponse } from "../types/spotifyTokenResponseType"
+import { TokenResponse } from "../types/spotifyTokenResponse"
 
 const {
   CLIENT_ID: clientId,

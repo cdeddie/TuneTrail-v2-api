@@ -1,8 +1,10 @@
-import { Request }              from 'express';
-import { getClientAccessToken } from '../../utils/spotifyClientCredentials';
-import { globalRateLimiter }    from '../../middleware/rateLimiter';
+import { Request }                      from 'express';
+import { getClientAccessToken }         from '../../utils/spotifyClientCredentials';
+import { globalRateLimiter }            from '../../middleware/rateLimiter';
+import { SpotifyArtistSearchResponse }  from '../../types/spotifyArtistSearchResponse';
+import { SpotifyTrackSearchResponse }   from '../../types/spotifyTrackSearchResponse';
 
-const fetchSpotifySearch = async (req: Request, ip: string) => {
+const fetchSpotifySearch = async (req: Request, ip: string): Promise<{ data: SpotifyArtistSearchResponse | SpotifyTrackSearchResponse; warning?: boolean }> => {
   const { allowed, warning } = globalRateLimiter.checkLimit(ip);
 
   if (!allowed) {
@@ -27,7 +29,13 @@ const fetchSpotifySearch = async (req: Request, ip: string) => {
 
     const rawData = await response.json();
 
-    return { data: rawData, warning };
+    if (type === 'artist') {
+      return { data: rawData as SpotifyArtistSearchResponse, warning };
+    } else if (type === 'track') {
+      return { data: rawData as SpotifyTrackSearchResponse, warning };
+    } else {
+      throw new Error('Invalid search type');
+    }
   } catch (error) {
     console.error('Error fetching search results:', error);
     throw error;

@@ -1,7 +1,8 @@
-import { Request}           from 'express';
-import fetchTrackPreviewUrl from './fetchTrackPreviewUrl';
+import { Request}                         from 'express';
+import fetchTrackPreviewUrl               from './fetchTrackPreviewUrl';
+import { SpotifyRecommendationResponse }  from '../../types/spotifyRecommendationResponse';
 
-const fetchSpotifyRecommendationsPrivate = async(req: Request) => {
+const fetchSpotifyRecommendationsPrivate = async(req: Request): Promise<SpotifyRecommendationResponse> => {
   try {
     const { limit, tags: encodedTags, recTargets: encodedRecTargets, seedType } = req.query;
 
