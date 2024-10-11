@@ -36,10 +36,12 @@ This route wraps the Spotify /search route (more details <a href="https://develo
 - *query*: user input string. Needs to be encoded i.e. **encodeURIComponent(query.toLowerCase())**. Important that the query before encoded needs to be set to lower case.
 - *type*: The frontend only makes use of 'artist' and 'track' type, but the Spotify API supports further types.
 
-**Functionality**<br>
+**Functionality**
+
 Currently the limit (number of items returned) is hardcoded to 5. This is due to only displaying the first 5 items in the search results on the frontend.
 
-**Response**<br>
+**Response**
+
 Depending on the *type* provided, the response can either be a `SpotifyArtistSearchResponse` or a `SpotifyTrackSearchResponse`. They both follow a structure like so:
 
 ```ts
