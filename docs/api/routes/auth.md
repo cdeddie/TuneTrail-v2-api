@@ -1,5 +1,5 @@
 # Spotify Authentication Flow
-This file handles Spotify user authentication using the [Auth Code Flow](https://developer.spotify.com/documentation/web-api/tutorials/code-flow). Handles login, session management and access/refresh tokens. It contains the following routes:
+This file handles Spotify user authentication using the <a href="https://developer.spotify.com/documentation/web-api/tutorials/code-flow" target="_blank">Auth Code Flow</a>. Handles login, session management and access/refresh tokens. It contains the following routes:
 
 ## Routes
 
@@ -42,6 +42,7 @@ GET /callback?code=<authorization_code>&state=<state>
 - Redirects the user to the requested page or the default discover page.
 
 An overview of how the Spotify auth flow works is shown:
+
 <img src="https://developer.spotify.com/images/documentation/web-api/auth-code-flow.png" alt="auth flow diagram" width="600">
 
 ### ```GET /refresh_token```
@@ -91,7 +92,7 @@ GET /status
   "isLoggedIn": true,
 }
 ```
-spotifyInfo is essentially the entire object returned from the Spotify API's ```/me``` route. More info [here](https://developer.spotify.com/documentation/web-api/reference/get-current-users-profile).
+spotifyInfo is essentially the entire object returned from the Spotify API's ```/me``` route. More info <a href="https://developer.spotify.com/documentation/web-api/reference/get-current-users-profile" target="_blank">here</a>.
 
 ### ```GET /logout```
 **Description**
@@ -107,20 +108,20 @@ GET /logout
 - Redirects to the homepage.
 
 ## Utility Functions
-```typescript
+```ts
 generateRandomString(length: number)
 ```
 
 Generates a random string of specified length using the *crypto* library. Used for state in the auth flow.
 
-```typescript
+```ts
 updateSession(req: Request, tokenResponse: TokenResponse, spotifyData: SpotifyUserResponse)
 ```
 This helper function updates the session with the user’s Spotify tokens and profile information.
 
 **Parameters**
 
-- req: The Express request object, which includes the session
+- req: The Express request object, which includes the session. Has been interfaced to include additional data that is relevant to user's personal spotify info (including access token)
 - tokenResponse: The response from Spotify’s token endpoint, containing the access token and refresh token
 - spotifyData: The user’s profile data returned from Spotify
 
@@ -136,6 +137,6 @@ This helper function updates the session with the user’s Spotify tokens and pr
 3. User is redirected to Spotify's authorization page.
 4. After authorization, Spotify redirects the user back to /callback.
 5. Access and refresh tokens are stored in the session.
-6. The frontend can now fetch the user’s Spotify data and make authenticated requests using the access token. 
+6. The frontend can now fetch the user’s Spotify data (profile picture) and make authenticated requests using the user's own access token. 
 
-The frontend can also interact with the user's Spotify account (not implemented yet, but for example, adding recommended songs to user's library, using user's top songs to suggest what to find recommendations for, excluding songs already in user's library from being recommended)
+The frontend will also be able to interact with the user's Spotify account (not implemented yet, but for example, adding recommended songs to user's library, using user's top songs to suggest what to find recommendations for, excluding songs already in user's library from being recommended)

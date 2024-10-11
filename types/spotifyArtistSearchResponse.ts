@@ -4,13 +4,14 @@ export type SpotifyArtistSearchResponse = {
   href: string;
   items: Item[];
   limit: number;
-  next: string;
+  next: string | null;
   offset: number;
-  previous: any;
+  previous: string | null;
   total: number;
 };
 
-export interface Item {
+// Artist item
+type Item = {
   external_urls: ExternalUrls;
   followers: Followers;
   genres: string[];

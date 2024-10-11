@@ -20,12 +20,12 @@ GET /top-50/<country: string>
 - *country*: A string for the valid countries (countries that have the top-50 json data in /data) which are tracked. 
 
 **Functionality**
-- Returns the playlist data which is stored in the json file within /data. For more info on spotify playlist data, see [here](https://developer.spotify.com/documentation/web-api/reference/get-playlist).
+- Returns the playlist data which is stored in the json file within /data. For more info on spotify playlist data, see <a href="https://developer.spotify.com/documentation/web-api/reference/get-playlist" target="_blank">here</a>.
 
 ### ```GET /search```
 **Description**
 
-This route wraps the Spotify /search route (more details [here](https://developer.spotify.com/documentation/web-api/reference/search)). This route also makes use of a service function **fetchSpotifySearch** which includes rate limiting, which requires the users ip to execute.
+This route wraps the Spotify /search route (more details <a href="https://developer.spotify.com/documentation/web-api/reference/search" target="_blank">here</a>). This route also makes use of a service function **fetchSpotifySearch** which includes rate limiting, which requires the users ip to execute.
 
 **Usage**
 ```
@@ -36,5 +36,21 @@ This route wraps the Spotify /search route (more details [here](https://develope
 - *query*: user input string. Needs to be encoded i.e. **encodeURIComponent(query.toLowerCase())**. Important that the query before encoded needs to be set to lower case.
 - *type*: The frontend only makes use of 'artist' and 'track' type, but the Spotify API supports further types.
 
-**Response**
+**Functionality**<br>
+Currently the limit (number of items returned) is hardcoded to 5. This is due to only displaying the first 5 items in the search results on the frontend.
 
+**Response**<br>
+Depending on the *type* provided, the response can either be a `SpotifyArtistSearchResponse` or a `SpotifyTrackSearchResponse`. They both follow a structure like so:
+
+```ts
+export type SpotifyArtistSearchResponse = {
+  href: string;
+  items: Item[];
+  limit: number;
+  next: string | null;
+  offset: number;
+  previous: string | null;
+  total: number;
+};
+```
+However, the Item type is different in each (one representing a Track, the other an Artist).

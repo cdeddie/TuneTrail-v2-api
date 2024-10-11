@@ -38,6 +38,7 @@ export type Album = {
 };
 
 export type Track = {
+  album: Album;
   artists: Artist[];
   disc_number: number;
   duration_ms: number;
@@ -53,5 +54,4 @@ export type Track = {
   track_number: number;
   type: string;
   uri: string;
-  album: Album;
 };

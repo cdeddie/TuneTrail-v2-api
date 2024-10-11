@@ -4,13 +4,14 @@ export type SpotifyTrackSearchResponse = {
   href: string;
   items: Item[];
   limit: number;
-  next: string;
+  next: string | null;
   offset: number;
-  previous: any;
+  previous: string | null;
   total: number;
 };
 
-export type Item = {
+// Track item
+type Item = {
   album: Album;
   artists: Artist[];
   disc_number: number;
