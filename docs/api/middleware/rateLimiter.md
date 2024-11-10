@@ -1,31 +1,49 @@
 # Rate Limiter
-Custom rate limiter I wrote. The idea behind it is that there is no user-specific limit per window (which is 60 seconds in my case), until 60% of the quota has been used. At that point, the remaining quota is divided equally between all current active users in the window.
+## Overview
+Express middleware uses sliding window queue to control request rates. Tracks both individual user requests while also mantaining a global request count to provide warning and blocking thresholds. There are two classes - ```SlidingWindowCounter``` and ```RateLimiter```. The first class is used as a reusable data structure in a user map in the RateLimiter class, to track requests per each unique user.
 
-## Features
-- Global rate limiting with sliding window (removes old users requests)
-- Dynamic quota allocation when traffic is busy, with user-specific limiting
-- Sends a warning header when half of the user's *'busy'* quota is reached
-- Exports a middleware function that uses a global rateLimiter object
+## ```SlidingWindowCounter``` class
+### Member variables
+- **queue**: Queue of type ```RequestRecord```, which simply stores a timestamp. Used a type for potential changes in future (maybe adding an ip to each record, etc).
+- **windowMs**: Length of window in ms
 
-## Functions
-### ```constructor(windowSizeInSeconds: number, globalLimit: number, warningLimit: number, busyThreshold: number)```
-Creates a new instance of the rate limiter. This is used once in the rateLimiter file to use as a global object.
+### Member functions
+- **```add(timestamp: number): void```**: Adds the current request to the queue, then proceeds to clean the queue
+- **```private cleanup(now: number): void```**: Cleans the queue by shifting any requests that are older than the current window size
+- **```getCount(now: number): number```**: Returns the total number of requests in the current window, indicated by the length of the queue.
+- **```isEmpty(): boolean```**: Returns true if the queue is empty. Used for cleanup in the RateLimiter class.
 
-#### Parameters
-- ```windowSizeInSeconds```: The size of the window in seconds. 60 seconds in my app.
-- ```globalLimit```: Maximum number of requests. I found a thread online that claimed Spotify API usually around 160 requests per minute.
-- ```busyThreshold```: Percentage of global limit at which the limiter switches to user-specific quotas
+## ```RateLimiter``` class
 
-### ```checkLimit(ip: string): { allowed: boolean; warning: boolean }```
-This is the core of the rate limiter - it will check to see if the rate limit has been hit, and will also check the user warning map to see if a warning needs to be sent. Returns a boolean for each.
+### Member variables
+- **userCounters**: Maps a SlidingWindowCounter container to each ip (string). Used for user specific warnings and blocking
+- **globalCounter**: Used for tracking the total number of requests
+- **config**: Uses the RateLimitConfig type to setup the rate limiter, with these parameters:
+```ts
+type RateLimitConfig = {
+  windowMs: number;              // Time of window in ms
+  maxRequests: number;           // Maximum requests allowed in that window
+  userWarningThreshold: number;  // Percentage of max requests that triggers warning
+  userBlockThreshold: number;    // Percentage of max requests that triggers blocking
+};
+```
+- **lastCleanup**: Used for keeping track of when the userCounters map should be cleaned. 
 
-### ```globalRateLimiterMiddleware(req: Request, res: Response, next: NextFunction)```
-Express middleware that applies the rateLimiter to incoming requests
+### Member functions
+- **```private getClientIdentifier(req: Request)```**: Not really sure if I should even have this as a function
+- **```private calculateThreshold (percentage: number): number```**: Given a percentage (30, 40 etc) returns the percentage of the maxRequests. Used for warning/blocking
+- **```private getUserCounter(clientId: string): SlidingWindowCounter```**: Returns the SlidingWindowCounter object associated with a particular user, if that user does not exist in the *userCounters* map, then that user is inserted.
+- **```private cleanupUserCounters(now: number): void```**: Iterates over all user counters and performs cleanup on each - uses cleanup() function from SlidingWindowCounter class
+- **```middleware()```**: Actual rate limiter logic function.
+    - If it has been more than 5 minutes since last cleanup, then cleanup now.
+    - Adds the current request to both the global window and the user window.
+    - Sets some headers that give info to client. Conditionally sets 'X-RateLimit-Warning' if user has consumed more requests than the warning threshold (15%)
+    - Returns 429 error if user exceeded the block threshold (30% of requests in 1 minute window)
 
-- Sets the 'X-Rate-Limit-Warning' header if a warning is issued
-- Calls next() if the request is allowed
-- Sends a 429 status code if the request is denied
+### Usage Example
+```ts
+import { GlobalLimiter } from 'middleware/rateLimiter.ts';
 
-### Notes
-- No cleanup method, the old requests/users get removed using ```.filter()```
-
+const router = express.Router();
+router.use(GlobalLimiter.middleware());
+```

@@ -1,5 +1,5 @@
 import { Request }                        from 'express';
-import fetchSpotifyRecommendations        from "../services/public/fetchSpotifyRecommendations";
+import fetchSpotifyRecommendations        from "../services/public/fetchSpotifyRecommendationsPublic";
 import { SpotifyRecommendationResponse }  from "../types/spotifyRecommendationResponse";
 
 describe('publicFetchSpotifyRecommendations Integration Test', () => {

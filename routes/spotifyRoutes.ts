@@ -1,13 +1,17 @@
 import express, { Request, Response } from 'express';
+import { GlobalLimiter }              from '../middleware/rateLimiter';
 import fs                             from 'fs/promises';
 import path                           from 'path';
 
-import fetchSpotifySearch                 from '../services/public/fetchSpotifySearch';
-import fetchSpotifyRecommendations        from '../services/public/fetchSpotifyRecommendations';
+import fetchSpotifySearchPublic           from '../services/public/fetchSpotifySearchPublic';
+import fetchSpotifySearchPrivate          from '../services/private/fetchSpotifySearchPrivate';
+import fetchSpotifyRecommendationsPublic  from '../services/public/fetchSpotifyRecommendationsPublic';
 import fetchSpotifyRecommendationsPrivate from '../services/private/fetchSpotifyRecommendationsPrivate';
 import refreshTokenIfNeeded               from '../middleware/refreshTokenIfNeeded';
 
 const router = express.Router();
+
+const rateLimiter = GlobalLimiter.middleware();
 
 router.get('/top-50/:country', async (req: Request, res: Response) => {
   try {
@@ -24,57 +28,45 @@ router.get('/top-50/:country', async (req: Request, res: Response) => {
   }
 });
 
-router.get('/search', async(req: Request, res: Response) => {
-  const ip = req.ip;
-
-  if (!ip) {
-    console.error('Unable to determine client IP address');
-    return res.status(500).send('Internal Server Error');
-  }
-
+router.get('/search', refreshTokenIfNeeded, async(req: Request, res: Response) => {
   try {
-    const { data, warning } = await fetchSpotifySearch(req, ip);
-
-    if (warning) {
-      res.setHeader('X-Rate-Limit-Warning', 'True');
-    }
+    const data = await fetchSpotifySearchPrivate(req);
 
     return res.status(200).send(data);
   } catch (error) {
-    if (error instanceof Error && error.message === 'Rate limit exceeded') {
-      return res.status(429).send({ error: error.message });
-    }
     console.error(error);
     return res.status(500).send(error);
   }
 });
 
-router.get('/recommendations', refreshTokenIfNeeded, async(req: Request, res: Response) => {
-  const ip = req.ip;
-
-  if (!ip) {
-    console.error('Unable to determine client IP address');
-    return res.status(500).send('Internal Server Error');
-  }
-
+router.get('/public-search', rateLimiter, async(req: Request, res: Response) => {
   try {
-    let recommendations;
-    if (req.session.is_logged_in) {
-      recommendations = await fetchSpotifyRecommendationsPrivate(req);
-    } else {
-      const { data, warning } = await fetchSpotifyRecommendations(req, ip);
-      
-      if (warning) {
-        res.setHeader('X-Rate-Limit-Warning', 'True');
-      }
+    const data = await fetchSpotifySearchPublic(req);
 
-      recommendations = data;
-    }
-    return res.status(200).send(recommendations);
+    return res.status(200).send(data);
   } catch (error) {
-    if (error instanceof Error && error.message === 'Rate limit exceeded') {
-      return res.status(429).send({ error: error.message });
-    }
+    console.error(error);
+    return res.status(500).send(error);
+  }
+});
+
+router.get('/recommendation', refreshTokenIfNeeded, async(req: Request, res: Response) => {
+  try {
+    const data = await fetchSpotifyRecommendationsPrivate(req);
+
+    return res.status(200).send(data);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).send(error);
+  }
+});
+
+router.get('/public-recommendation', rateLimiter, async(req: Request, res: Response) => {
+  try {
+    const data = await fetchSpotifyRecommendationsPublic(req);
+
+    return res.status(200).send(data);
+  } catch (error) {
     console.error(error);
     return res.status(500).send(error);
   }

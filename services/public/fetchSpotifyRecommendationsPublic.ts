@@ -1,5 +1,4 @@
 import { Request }                        from 'express';
-import { globalRateLimiter }              from '../../middleware/rateLimiter';
 import { getClientAccessToken }           from "../../utils/spotifyClientCredentials";
 import { SpotifyRecommendationResponse }  from '../../types/spotifyRecommendationResponse';
 
@@ -8,14 +7,9 @@ import { SpotifyRecommendationResponse }  from '../../types/spotifyRecommendatio
 // ?seed_artists= OR ?seed_tracks=
 // for each recommendationTargets (which will be delivered as a string of all filters seperated by comma, i.e. acousticness=37,energy=100)
 
-const fetchSpotifyRecommendations = async(req: Request, ip: string): Promise<{ data: SpotifyRecommendationResponse, warning?: boolean }> => {
-  const { allowed, warning } = globalRateLimiter.checkLimit(ip);
-
-  if (!allowed) {
-    throw new Error('Rate limit exceeded');
-  }
-
+const fetchSpotifyRecommendationsPublic = async(req: Request): Promise<{ data: SpotifyRecommendationResponse }> => {
   try {
+    // Limit is no. songs
     const { limit, tags: encodedTags, recTargets: encodedRecTargets, seedType } = req.query;
 
     const tags = decodeURIComponent(encodedTags as string);
@@ -30,7 +24,7 @@ const fetchSpotifyRecommendations = async(req: Request, ip: string): Promise<{ d
     const recommendationPairs = recommendationString.split(',');
     recommendationPairs.forEach(pair => {
       const [word, number] = pair.split('=');
-      if (number) queryParams += `&target_${word}=${encodeURIComponent(number)}`;
+      if (number) queryParams += `&${word}=${encodeURIComponent(number)}`;
     });
 
     // example url: https://api.spotify.com/v1/recommendations?limit=25&seed_artists=5K4W6rqBFWDnAN6FQUkS6x&target_energy=40 - %2C represents ,
@@ -59,11 +53,11 @@ const fetchSpotifyRecommendations = async(req: Request, ip: string): Promise<{ d
       };
     });
 
-    return { data, warning };
+    return data;
   } catch (error) {
     console.error('Error fetching search results:', error);
     throw error;
   }
 };
 
-export default fetchSpotifyRecommendations;
+export default fetchSpotifyRecommendationsPublic;

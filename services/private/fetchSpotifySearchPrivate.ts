@@ -1,19 +1,11 @@
-import { Request }                      from 'express';
-import { getClientAccessToken }         from '../../utils/spotifyClientCredentials';
-import { globalRateLimiter }            from '../../middleware/rateLimiter';
+import { Request } from 'express';
 import { SpotifyArtistSearchResponse }  from '../../types/spotifyArtistSearchResponse';
 import { SpotifyTrackSearchResponse }   from '../../types/spotifyTrackSearchResponse';
 
-const fetchSpotifySearch = async (req: Request, ip: string): Promise<{ data: SpotifyArtistSearchResponse | SpotifyTrackSearchResponse; warning?: boolean }> => {
-  const { allowed, warning } = globalRateLimiter.checkLimit(ip);
-
-  if (!allowed) {
-    throw new Error('Rate limit exceeded');
-  }
-
+const fetchSpotifySearchPrivate = async(req: Request): Promise<SpotifyArtistSearchResponse | SpotifyTrackSearchResponse> => {
   try {
     const { query, type } = req.query;
-    const token = await getClientAccessToken();
+    const token = req.session.access_token;
     
     const url = `https://api.spotify.com/v1/search?q=${query}&type=${type}&market=AU&limit=5`;
     const response = await fetch(url, {
@@ -30,9 +22,9 @@ const fetchSpotifySearch = async (req: Request, ip: string): Promise<{ data: Spo
     const rawData = await response.json();
 
     if (type === 'artist') {
-      return { data: rawData as SpotifyArtistSearchResponse, warning };
+      return rawData as SpotifyArtistSearchResponse;
     } else if (type === 'track') {
-      return { data: rawData as SpotifyTrackSearchResponse, warning };
+      return rawData as SpotifyTrackSearchResponse;
     } else {
       throw new Error('Invalid search type');
     }
@@ -42,4 +34,4 @@ const fetchSpotifySearch = async (req: Request, ip: string): Promise<{ data: Spo
   }
 };
 
-export default fetchSpotifySearch;
+export default fetchSpotifySearchPrivate;
