@@ -27,6 +27,7 @@ type RateLimitConfig = {
   userBlockThreshold: number;    // Percentage of max requests that triggers blocking
 };
 ```
+Keep in mind that the rate limiter will allow ```maxRequests - 1``` amount of requests in a window. And the logic related to the two thresholds operates on greater-than i.e. if ```maxRequests``` is 10 and ```userWarningThreshold``` is 30, then the warning header will be set on the 4th request, not the 3rd request.
 - **lastCleanup**: Used for keeping track of when the userCounters map should be cleaned. 
 
 ### Member functions

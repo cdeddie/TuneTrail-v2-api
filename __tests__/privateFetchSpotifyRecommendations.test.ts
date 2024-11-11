@@ -7,7 +7,7 @@ describe('privateFetchSpotifyRecommendations Integration Test', () => {
     const accessToken = await getClientAccessToken();
     const mockRequest = {
       query: {
-        limit: '100',
+        limit: '25',
         tags: '%5B%223f3HHRPF5vAo90GwdpDMaQ%22%5D',
         recTargets: '',
         seedType: 'Track',
@@ -22,21 +22,7 @@ describe('privateFetchSpotifyRecommendations Integration Test', () => {
     try {
       const data = await fetchSpotifyRecommendationsPrivate(mockRequest);
 
-      expect(data.tracks.length).toEqual(100);
-      console.log('Number of returned tracks: ', data.tracks.length);
-
-      // Check if each track has a preview_url, and if it exists, ensure it's not an empty string
-      let missingPreviewUrls = 0;
-      data.tracks.forEach(track => {
-        if (track.preview_url) {
-          expect(track.preview_url).not.toEqual('');
-        } else if (!track.preview_url) {
-          missingPreviewUrls++;
-        }
-      });
-
-      expect(missingPreviewUrls).toEqual(0);
-
+      expect(data.tracks.length).toEqual(25);
     } catch (error) {
       console.error('Error during Spotify API call:', error);
       throw error;

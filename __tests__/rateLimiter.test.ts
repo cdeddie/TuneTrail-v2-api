@@ -20,6 +20,7 @@ describe('GlobalRateLimiter', () => {
       ip: '127',
     };
 
+    // Mock functions in res object
     res = {
       setHeader: jest.fn<(name: string, value: string | number | readonly string[]) => Response>(),
       status: jest.fn<(code: number) => Response>().mockReturnThis(),
@@ -30,7 +31,7 @@ describe('GlobalRateLimiter', () => {
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    jest.useRealTimers();     // useFakeTimers cleanup
     jest.clearAllMocks();
   });
 
@@ -99,14 +100,10 @@ describe('GlobalRateLimiter', () => {
     for (let i = 0; i < 10; i++) {
       middleware(req as Request, res as Response, next);
     }
-
-    // Should block after exceeding maxRequests
     expect(res.status).toHaveBeenCalledWith(429);
 
     // Advance time by windowMs (10 seconds)
     jest.advanceTimersByTime(10 * 1000);
-
-    // Clear mocks to reset call counts
     jest.clearAllMocks();
 
     // Should allow requests again
@@ -120,12 +117,12 @@ describe('GlobalRateLimiter', () => {
     const reqUser1 = { ip: '192.168.1.1' } as Request;
     const reqUser2 = { ip: '192.168.1.2' } as Request;
 
-    // User 1 makes 5 requests
+    // User 1 makes 4 requests
     for (let i = 0; i < 4; i++) {
       middleware(reqUser1, res as Response, next);
     }
 
-    // User 2 makes 5 requests
+    // User 2 makes 4 requests
     for (let i = 0; i < 4; i++) {
       middleware(reqUser2, res as Response, next);
     }

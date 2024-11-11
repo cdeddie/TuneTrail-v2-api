@@ -1,8 +1,13 @@
 import { Request } from 'express';
+import { Track }    from '../../types/spotifyCommonTypes';
 
 type TrackPreview = {
   id: string;
   url: string;
+}
+
+type SpotifyTracksReturn = {
+  tracks: Track[];
 }
 
 const fetchTrackPreviewUrl = async (req: Request, trackIdList: string[]): Promise<TrackPreview[]> => {
@@ -21,15 +26,20 @@ const fetchTrackPreviewUrl = async (req: Request, trackIdList: string[]): Promis
       throw new Error(`Fetch recommendations [Spotify API] failed with status: ${response.status}`);
     }
 
-    const data = await response.json();
+    const data: SpotifyTracksReturn = await response.json();
+    console.log('No of songs retrieved from /tracks', data.tracks.length);
     const previews: TrackPreview[] = [];
 
     for (let i = 0; i < data.tracks.length; i++) {
-      const preview: TrackPreview = {
-        id: data.tracks[i].id,
-        url: data.tracks[i].preview_url,
+      const curr = data.tracks[i];
+      if (curr.preview_url && curr.preview_url !== '' && curr.preview_url !== undefined) {
+        const preview: TrackPreview = {
+          id: curr.id,
+          url: curr.preview_url,
+        }
+        console.log(preview);
+        previews.push(preview);
       }
-      previews.push(preview);
     }
 
     return previews;

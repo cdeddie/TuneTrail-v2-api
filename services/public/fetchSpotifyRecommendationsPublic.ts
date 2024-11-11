@@ -7,7 +7,7 @@ import { SpotifyRecommendationResponse }  from '../../types/spotifyRecommendatio
 // ?seed_artists= OR ?seed_tracks=
 // for each recommendationTargets (which will be delivered as a string of all filters seperated by comma, i.e. acousticness=37,energy=100)
 
-const fetchSpotifyRecommendationsPublic = async(req: Request): Promise<{ data: SpotifyRecommendationResponse }> => {
+const fetchSpotifyRecommendationsPublic = async(req: Request): Promise<SpotifyRecommendationResponse> => {
   try {
     // Limit is no. songs
     const { limit, tags: encodedTags, recTargets: encodedRecTargets, seedType } = req.query;
@@ -52,6 +52,13 @@ const fetchSpotifyRecommendationsPublic = async(req: Request): Promise<{ data: S
         album: restOfAlbum
       };
     });
+
+    // let averagePopularity = 0;
+    // for (let i = 0; i < data.tracks.length; i++) {
+    //   averagePopularity += data.tracks[i].popularity;
+    // }
+    // averagePopularity /= data.tracks.length;
+    // // console.log('Avg popularity: ', averagePopularity);
 
     return data;
   } catch (error) {

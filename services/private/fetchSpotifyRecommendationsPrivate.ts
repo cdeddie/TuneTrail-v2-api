@@ -1,6 +1,7 @@
 import { Request}                         from 'express';
 import fetchTrackPreviewUrl               from './fetchTrackPreviewUrl';
 import { SpotifyRecommendationResponse }  from '../../types/spotifyRecommendationResponse';
+import { Track }                          from '../../types/spotifyCommonTypes';
 
 const fetchSpotifyRecommendationsPrivate = async(req: Request): Promise<SpotifyRecommendationResponse> => {
   try {
@@ -35,19 +36,7 @@ const fetchSpotifyRecommendationsPrivate = async(req: Request): Promise<SpotifyR
       throw new Error(`Fetch recommendations [Spotify API] failed with status: ${response.status}`);
     }
 
-    // Loop over each track, if preview_url === null, then perform further api calls.
     const recommendations = await response.json();
-
-    const trackIds: string[] = [];
-    for (let i = 0; i < recommendations.tracks.length; i++) {
-      const track = recommendations.tracks[i];
-      if (track.preview_url === null) {
-        trackIds.push(track.id);
-      }
-    }
-
-    const missingPreviews = await fetchTrackPreviewUrl(req, trackIds);
-    let previewIndex = 0;
 
     // We're looking into this very strongly
     recommendations.tracks = recommendations.tracks.map((track: any) => {
@@ -58,15 +47,6 @@ const fetchSpotifyRecommendationsPrivate = async(req: Request): Promise<SpotifyR
         album: restOfAlbum
       };
     });
-
-    // Replacing null with missing preview
-    for (let i = 0; i < recommendations.tracks.length; i++) {
-      const track = recommendations.tracks[i];
-      if (track.preview_url === null && track.id === missingPreviews[previewIndex].id) {
-        track.preview_url = missingPreviews[previewIndex].url;
-        previewIndex++;
-      }
-    }
 
     return recommendations;
   } catch (error) {

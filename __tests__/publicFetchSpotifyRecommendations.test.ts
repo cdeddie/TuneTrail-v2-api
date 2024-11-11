@@ -1,12 +1,12 @@
 import { Request }                        from 'express';
-import fetchSpotifyRecommendations        from "../services/public/fetchSpotifyRecommendationsPublic";
+import fetchSpotifyRecommendationsPublic  from "../services/public/fetchSpotifyRecommendationsPublic";
 import { SpotifyRecommendationResponse }  from "../types/spotifyRecommendationResponse";
 
 describe('publicFetchSpotifyRecommendations Integration Test', () => {
   it('should call Spotify API and return valid SpotifyRecommendationResponse structure', async () => {
     const mockRequest = {
       query: {
-        limit: '10',
+        limit: '50',
         tags: '%5B%223f3HHRPF5vAo90GwdpDMaQ%22%5D',
         recTargets: '', 
         seedType: 'Track',
@@ -16,15 +16,14 @@ describe('publicFetchSpotifyRecommendations Integration Test', () => {
     const ip = '127.0.0.1';
 
     try {
-      const { data, warning } = await fetchSpotifyRecommendations(mockRequest, ip);
+      const data = await fetchSpotifyRecommendationsPublic(mockRequest);
 
       const isValidResponse = (response: SpotifyRecommendationResponse): boolean => {
         return Array.isArray(response.tracks) && Array.isArray(response.seeds);
       };
 
       expect(isValidResponse(data)).toBe(true);
-      expect(data.tracks.length).toEqual(10);
-      expect(warning).toBe(false);
+      expect(data.tracks.length).toEqual(50);
 
       console.log('Number of tracks:', data.tracks.length);
       console.log('Seeds:', data.seeds);
