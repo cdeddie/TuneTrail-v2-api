@@ -1,5 +1,6 @@
 import express, { Request, Response } from 'express';
 import { GlobalLimiter }              from '../middleware/rateLimiter';
+import redisClient                    from '../utils/redis';
 import fs                             from 'fs/promises';
 import path                           from 'path';
 
@@ -41,7 +42,17 @@ router.get('/search', refreshTokenIfNeeded, async(req: Request, res: Response) =
 
 router.get('/public-search', rateLimiter, async(req: Request, res: Response) => {
   try {
+    const { query, type } = req.query;
+    const cacheKey = `search:${query}:${type}`;
+
+    const cachedData = await redisClient.get(cacheKey);
+    if (cachedData) {
+      console.log('Serving search from redis');
+      return res.status(200).send(JSON.parse(cachedData));
+    }
+
     const data = await fetchSpotifySearchPublic(req);
+    await redisClient.setEx(cacheKey, 3600, JSON.stringify(data));
 
     return res.status(200).send(data);
   } catch (error) {
@@ -63,7 +74,17 @@ router.get('/recommendation', refreshTokenIfNeeded, async(req: Request, res: Res
 
 router.get('/public-recommendation', rateLimiter, async(req: Request, res: Response) => {
   try {
+    const { limit, tags, recTargets, seedType } = req.query;
+    const cacheKey = `recommendation:${limit}:${tags}:${recTargets}:${seedType}`;
+
+    const cachedData = await redisClient.get(cacheKey);
+    if (cachedData) {
+      console.log('Serving recommendation from redis');
+      return res.status(200).send(JSON.parse(cachedData));
+    }
+
     const data = await fetchSpotifyRecommendationsPublic(req);
+    await redisClient.setEx(cacheKey, 3600, JSON.stringify(data));
 
     return res.status(200).send(data);
   } catch (error) {

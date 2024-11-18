@@ -53,6 +53,14 @@ const fetchSpotifyRecommendationsPublic = async(req: Request): Promise<SpotifyRe
       };
     });
 
+    // let totalNull = 0;
+    // for (let i = 0; i < data.tracks.length; i++) {
+    //   if (!data.tracks[i].preview_url) {
+    //     totalNull++;
+    //   }
+    // }
+    // console.log('Total no of null previews: ', totalNull, 'Total no of tracks: ', data.tracks.length);
+
     // let averagePopularity = 0;
     // for (let i = 0; i < data.tracks.length; i++) {
     //   averagePopularity += data.tracks[i].popularity;

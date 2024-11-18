@@ -7,7 +7,7 @@ describe('publicFetchSpotifyRecommendations Integration Test', () => {
     const mockRequest = {
       query: {
         limit: '50',
-        tags: '%5B%223f3HHRPF5vAo90GwdpDMaQ%22%5D',
+        tags: '%5B%223DK6m7It6Pw857FcQftMds%22%5D',
         recTargets: '', 
         seedType: 'Track',
       },
@@ -25,8 +25,15 @@ describe('publicFetchSpotifyRecommendations Integration Test', () => {
       expect(isValidResponse(data)).toBe(true);
       expect(data.tracks.length).toEqual(50);
 
+      let totalNull = 0;
+      for (let i = 0; i < data.tracks.length; i++) {
+        if (data.tracks[i].preview_url == null) {
+          totalNull++;
+        }
+      }
+      console.log('Total no of null previews: ', totalNull);
+
       console.log('Number of tracks:', data.tracks.length);
-      console.log('Seeds:', data.seeds);
 
     } catch (error) {
       console.error('Error during Spotify API call:', error);

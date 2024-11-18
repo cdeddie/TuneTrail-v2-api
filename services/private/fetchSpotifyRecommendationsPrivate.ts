@@ -1,10 +1,12 @@
 import { Request}                         from 'express';
-import fetchTrackPreviewUrl               from './fetchTrackPreviewUrl';
 import { SpotifyRecommendationResponse }  from '../../types/spotifyRecommendationResponse';
-import { Track }                          from '../../types/spotifyCommonTypes';
 
 const fetchSpotifyRecommendationsPrivate = async(req: Request): Promise<SpotifyRecommendationResponse> => {
   try {
+    if (!req.session.is_logged_in) {
+      throw new Error('User must be logged in');
+    }
+
     const { limit, tags: encodedTags, recTargets: encodedRecTargets, seedType } = req.query;
 
     const tags = decodeURIComponent(encodedTags as string);
@@ -47,6 +49,14 @@ const fetchSpotifyRecommendationsPrivate = async(req: Request): Promise<SpotifyR
         album: restOfAlbum
       };
     });
+
+    // let totalNull = 0;
+    // for (let i = 0; i < recommendations.tracks.length; i++) {
+    //   if (recommendations.tracks[i].preview_url === null || recommendations.tracks[i].preview_url === undefined) {
+    //     totalNull++;
+    //   }
+    // }
+    // console.log('Total no of null previews private: ', totalNull);
 
     return recommendations;
   } catch (error) {
