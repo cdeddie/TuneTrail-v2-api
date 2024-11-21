@@ -1,8 +1,8 @@
-import express, { Application, Request, Response }  from 'express';
-import session                                      from 'express-session';
-import cookieparser                                 from 'cookie-parser';
-import cors                                         from 'cors';
-import dotenv                                       from 'dotenv';
+import express, { Application }   from 'express';
+import session                    from 'express-session';
+import cookieparser               from 'cookie-parser';
+import cors                       from 'cors';
+import dotenv                     from 'dotenv';
 
 const app: Application = express();
 dotenv.config();

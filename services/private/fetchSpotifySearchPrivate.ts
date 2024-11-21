@@ -1,8 +1,6 @@
 import { Request } from 'express';
-import { SpotifyArtistSearchResponse }  from '../../types/spotifyArtistSearchResponse';
-import { SpotifyTrackSearchResponse }   from '../../types/spotifyTrackSearchResponse';
 
-const fetchSpotifySearchPrivate = async(req: Request): Promise<SpotifyArtistSearchResponse | SpotifyTrackSearchResponse> => {
+const fetchSpotifySearchPrivate = async(req: Request): Promise<SpotifyApi.ArtistSearchResponse | SpotifyApi.TrackSearchResponse> => {
   try {
     const { query, type } = req.query;
     const token = req.session.access_token;
@@ -22,9 +20,9 @@ const fetchSpotifySearchPrivate = async(req: Request): Promise<SpotifyArtistSear
     const rawData = await response.json();
 
     if (type === 'artist') {
-      return rawData as SpotifyArtistSearchResponse;
+      return rawData as SpotifyApi.ArtistSearchResponse;
     } else if (type === 'track') {
-      return rawData as SpotifyTrackSearchResponse;
+      return rawData as SpotifyApi.TrackSearchResponse;
     } else {
       throw new Error('Invalid search type');
     }

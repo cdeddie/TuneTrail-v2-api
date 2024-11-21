@@ -1,6 +1,4 @@
-import { SpotifyUserResponse } from "../types/spotifyUserResponse";
-
-const fetchSpotifyUser = async (accessToken: string): Promise<SpotifyUserResponse> => {
+const fetchSpotifyUser = async (accessToken: string): Promise<SpotifyApi.UserObjectPublic> => {
   const response = await fetch('https://api.spotify.com/v1/me', {
     headers: { 'Authorization': `Bearer ${accessToken}` }
   });
@@ -9,7 +7,7 @@ const fetchSpotifyUser = async (accessToken: string): Promise<SpotifyUserRespons
     throw new Error(`HTTP error! status: ${response.status}`);
   }
 
-  const data = await response.json() as SpotifyUserResponse;
+  const data = await response.json() as SpotifyApi.UserObjectPublic;
   return data;
 };
 

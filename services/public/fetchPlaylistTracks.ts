@@ -14,24 +14,11 @@ const fetchPlaylistTracks = async (playlistId: string) => {
       throw new Error(`Fetch playlist tracks failed with status: ${response.status} (${response.statusText})`);
     }
 
-    const data = await response.json();
-
-    // We're looking into this very strongly
-    data.items = data.items.map((item: any) => {
-      const { track, ...restOfItem } = item;
-      const { album, available_markets, ...restOfTrack } = track;
-      const { available_markets: albumMarkets, ...restOfAlbum } = album;
-      return {
-        ...restOfItem,
-        track: {
-          ...restOfTrack,
-          album: restOfAlbum
-        }
-      };
-    });
+    const data: SpotifyApi.PlaylistTrackResponse = await response.json();
 
     return data;
   } catch (error) {
+    console.error(error);
     throw error;
   }
 };

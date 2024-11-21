@@ -3,7 +3,6 @@ import querystring                            from 'querystring';
 import crypto                                 from 'crypto';
 
 import { TokenResponse }                      from '../types/spotifyTokenResponse';
-import { SpotifyUserResponse }                from '../types/spotifyUserResponse';
 import { CallbackQueryParams }                from '../types/callbackQueryParams';
 import { fetchSpotifyToken }                  from '../utils/fetchSpotifyToken';
 import { fetchSpotifyUser }                   from '../utils/fetchSpotifyUser';
@@ -22,7 +21,7 @@ declare module 'express-session' {
     refresh_token?: string;
     is_logged_in?: boolean;
     token_expiry?: number;
-    spotify_info?: SpotifyUserResponse
+    spotify_info?: SpotifyApi.UserObjectPublic
   }
 }
 
@@ -55,7 +54,7 @@ router.get('/login', (req: Request, res: Response) => {
 });
 
 // Helper function to update session on /callback
-const updateSession = (req: Request, tokenResponse: TokenResponse, spotifyData: SpotifyUserResponse): void => {
+const updateSession = (req: Request, tokenResponse: TokenResponse, spotifyData: SpotifyApi.UserObjectPublic): void => {
   req.session.access_token = tokenResponse.access_token;
   req.session.refresh_token = tokenResponse.refresh_token;
   req.session.is_logged_in = true;

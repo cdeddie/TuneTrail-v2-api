@@ -3,17 +3,17 @@
 import fetchPlaylistTracks  from '../services/public/fetchPlaylistTracks';
 
 type Album = {
-  image: string;
-  link: string;
+  image?: string;
+  link?: string;
 }
 
 export const fetchAndProcessPlaylist = async (playlistId: string): Promise<Album[]> => {
   try {
-    const playlistData: any = await fetchPlaylistTracks(playlistId);
+    const playlistData: SpotifyApi.PlaylistTrackResponse = await fetchPlaylistTracks(playlistId);
     
-    const albums: Album[] = playlistData.items.map((item: any) => ({
-      image: item.track.album.images[0].url,
-      link: item.track.album.uri
+    const albums: Album[] = playlistData.items.map((item: SpotifyApi.PlaylistTrackObject) => ({
+      image: item.track?.album.images[0].url,
+      link: item.track?.album.uri
     }));
 
     return albums;

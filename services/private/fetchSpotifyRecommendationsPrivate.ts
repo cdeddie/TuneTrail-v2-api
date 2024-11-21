@@ -1,7 +1,6 @@
 import { Request}                         from 'express';
-import { SpotifyRecommendationResponse }  from '../../types/spotifyRecommendationResponse';
 
-const fetchSpotifyRecommendationsPrivate = async(req: Request): Promise<SpotifyRecommendationResponse> => {
+const fetchSpotifyRecommendationsPrivate = async(req: Request): Promise<SpotifyApi.RecommendationsObject> => {
   try {
     if (!req.session.is_logged_in) {
       throw new Error('User must be logged in');
@@ -38,17 +37,7 @@ const fetchSpotifyRecommendationsPrivate = async(req: Request): Promise<SpotifyR
       throw new Error(`Fetch recommendations [Spotify API] failed with status: ${response.status}`);
     }
 
-    const recommendations = await response.json();
-
-    // We're looking into this very strongly
-    recommendations.tracks = recommendations.tracks.map((track: any) => {
-      const { album, available_markets, ...restOfTrack } = track;
-      const { available_markets: albumMarkets, ...restOfAlbum } = album;
-      return {
-        ...restOfTrack,
-        album: restOfAlbum
-      };
-    });
+    const recommendations: SpotifyApi.RecommendationsObject = await response.json();
 
     // let totalNull = 0;
     // for (let i = 0; i < recommendations.tracks.length; i++) {

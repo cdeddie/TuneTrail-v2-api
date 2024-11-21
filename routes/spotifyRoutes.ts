@@ -1,6 +1,6 @@
 import express, { Request, Response } from 'express';
 import { GlobalLimiter }              from '../middleware/rateLimiter';
-import redisClient                    from '../utils/redis';
+import redisClient                    from '../utils/redisClient';
 import fs                             from 'fs/promises';
 import path                           from 'path';
 
@@ -52,7 +52,7 @@ router.get('/public-search', rateLimiter, async(req: Request, res: Response) => 
     }
 
     const data = await fetchSpotifySearchPublic(req);
-    await redisClient.setEx(cacheKey, 3600, JSON.stringify(data));
+    await redisClient.setEx(cacheKey, 360, JSON.stringify(data));
 
     return res.status(200).send(data);
   } catch (error) {
@@ -84,7 +84,7 @@ router.get('/public-recommendation', rateLimiter, async(req: Request, res: Respo
     }
 
     const data = await fetchSpotifyRecommendationsPublic(req);
-    await redisClient.setEx(cacheKey, 3600, JSON.stringify(data));
+    await redisClient.setEx(cacheKey, 360, JSON.stringify(data));
 
     return res.status(200).send(data);
   } catch (error) {

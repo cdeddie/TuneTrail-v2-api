@@ -1,13 +1,12 @@
 import { Request }                        from 'express';
 import { getClientAccessToken }           from "../../utils/spotifyClientCredentials";
-import { SpotifyRecommendationResponse }  from '../../types/spotifyRecommendationResponse';
 
 // https://api.spotify.com/v1/recommendations
 // ?limit=50 [we will just have max at 50, and load them 10 at a time on frontend]
 // ?seed_artists= OR ?seed_tracks=
 // for each recommendationTargets (which will be delivered as a string of all filters seperated by comma, i.e. acousticness=37,energy=100)
 
-const fetchSpotifyRecommendationsPublic = async(req: Request): Promise<SpotifyRecommendationResponse> => {
+const fetchSpotifyRecommendationsPublic = async(req: Request): Promise<SpotifyApi.RecommendationsObject> => {
   try {
     // Limit is no. songs
     const { limit, tags: encodedTags, recTargets: encodedRecTargets, seedType } = req.query;
@@ -41,17 +40,7 @@ const fetchSpotifyRecommendationsPublic = async(req: Request): Promise<SpotifyRe
       throw new Error(`Fetch recommendations [Spotify API] failed with status: ${response.status}`);
     }
 
-    const data = await response.json();
-
-    // We're looking into this very strongly
-    data.tracks = data.tracks.map((track: any) => {
-      const { album, available_markets, ...restOfTrack } = track;
-      const { available_markets: albumMarkets, ...restOfAlbum } = album;
-      return {
-        ...restOfTrack,
-        album: restOfAlbum
-      };
-    });
+    const data: SpotifyApi.RecommendationsObject = await response.json();
 
     // let totalNull = 0;
     // for (let i = 0; i < data.tracks.length; i++) {

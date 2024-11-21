@@ -1,6 +1,5 @@
 import { Request }                        from 'express';
 import fetchSpotifyRecommendationsPublic  from "../services/public/fetchSpotifyRecommendationsPublic";
-import { SpotifyRecommendationResponse }  from "../types/spotifyRecommendationResponse";
 
 describe('publicFetchSpotifyRecommendations Integration Test', () => {
   it('should call Spotify API and return valid SpotifyRecommendationResponse structure', async () => {
@@ -18,7 +17,7 @@ describe('publicFetchSpotifyRecommendations Integration Test', () => {
     try {
       const data = await fetchSpotifyRecommendationsPublic(mockRequest);
 
-      const isValidResponse = (response: SpotifyRecommendationResponse): boolean => {
+      const isValidResponse = (response: SpotifyApi.RecommendationsObject): boolean => {
         return Array.isArray(response.tracks) && Array.isArray(response.seeds);
       };
 
