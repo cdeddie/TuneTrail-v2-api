@@ -89,7 +89,7 @@ router.get('/callback', async (req: Request<{}, {}, {}, CallbackQueryParams>, re
       : 'https://tunetrail.site/discover';
 
     if (parsedState.currentUrl) baseUrl = parsedState.currentUrl;
-    res.redirect(baseUrl);
+    res.redirect(baseUrl + '?spotifyLogin=true');
   } catch (error) {
     console.error('Error during authentication callback from Spotify:', (error as Error).message);
     res.redirect('/#' + new URLSearchParams({ error: 'invalid_token' }).toString());
