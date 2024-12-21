@@ -2,7 +2,7 @@ import { Request }                        from 'express';
 import fetchSpotifyRecommendationsPublic  from "../services/public/fetchSpotifyRecommendationsPublic";
 
 describe('publicFetchSpotifyRecommendations Integration Test', () => {
-  it('should call Spotify API and return valid SpotifyRecommendationResponse structure', async () => {
+  it('should call Spotify API and return valid SpotifyApi.RecommendationsObject structure with correct number of track', async () => {
     const mockRequest = {
       query: {
         limit: '50',
@@ -23,20 +23,41 @@ describe('publicFetchSpotifyRecommendations Integration Test', () => {
 
       expect(isValidResponse(data)).toBe(true);
       expect(data.tracks.length).toEqual(50);
-
-      let totalNull = 0;
-      for (let i = 0; i < data.tracks.length; i++) {
-        if (data.tracks[i].preview_url == null) {
-          totalNull++;
-        }
-      }
-      console.log('Total no of null previews: ', totalNull);
-
-      console.log('Number of tracks:', data.tracks.length);
-
     } catch (error) {
       console.error('Error during Spotify API call:', error);
       throw error;
     }
+  });
+
+  it('should return filtered recommendations based on recommendation targets (popularity)', async () => {
+    const mockRequest = {
+      query: {
+        limit: '50',
+        tags: '%5B%227KHQtpLpoIV3Wfu22YQT8y%22%5D',
+        recTargets: 'target_popularity=0',
+        seedType: 'Track',
+      },
+    } as unknown as Request;
+  
+    const data = await fetchSpotifyRecommendationsPublic(mockRequest);
+
+    const averagePopularity = data.tracks.reduce((sum, track) => sum + track.popularity, 0) / data.tracks.length;
+    const isPopularityInRange = averagePopularity >= 0 && averagePopularity <= 40;
+    expect(isPopularityInRange).toBe(true);
+  });
+  
+  it('should throw an error if tags are missing', async () => {
+    const mockRequest = {
+      query: {
+        limit: '10',
+        tags: '',
+        recTargets: '',
+        seedType: 'Track',
+      },
+    } as unknown as Request;
+  
+    await expect(fetchSpotifyRecommendationsPublic(mockRequest)).rejects.toThrow(
+      'Fetch recommendations [Spotify API] failed'
+    );
   });
 });

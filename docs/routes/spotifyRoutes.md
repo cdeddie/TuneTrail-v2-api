@@ -3,7 +3,9 @@ This file handles backend routes that essentially extend the Spotify API routes.
 
 Some routes distinguish between logged in and non-logged in users, such as the ```/recommendations``` route. This allows users that have not logged in using Spotify to still find recommendations (using the client credential flow). These specific routes make use of two different service functions that wrap the same Spotify API route - either a public service function (for non-logged in users), or a private service function.
 
-However, using public service functions can put strain on the backend. I believe that I read online (estimated by an individual) that the Spotify API has a rate limit of around 180 requests per minute. For this reason, I created a basic rate limiter that acts on some of the service functions that are present in certain routes in this file.
+However, using public service functions can put strain on the backend. I believe that I read online (estimated by an individual) that the Spotify API has a rate limit of around 180 requests per minute. For this reason, I created a basic rate limiter that acts on some of the routes in this file.
+
+All types used are from @types/spotify-api
 
 ## Routes
 ### ```GET /top-50/:country```
@@ -22,14 +24,14 @@ GET /top-50/<country: string>
 **Functionality**
 - Returns the playlist data which is stored in the json file within /data. For more info on spotify playlist data, see <a href="https://developer.spotify.com/documentation/web-api/reference/get-playlist" target="_blank">here</a>.
 
-### ```GET /search```
+### ```GET /search && GET /public-search```
 **Description**
 
-This route wraps the Spotify /search route (more details <a href="https://developer.spotify.com/documentation/web-api/reference/search" target="_blank">here</a>). This route also makes use of a service function **fetchSpotifySearch** which includes rate limiting, which requires the users ip to execute.
+These routes wrap the Spotify /search route (more details <a href="https://developer.spotify.com/documentation/web-api/reference/search" target="_blank">here</a>). The `/search` route is intended for users that have logged in with Spotify auth, while the `/public-search` is intended for public users and makes use of a basic rate limiting middleware. 
 
 **Usage**
 ```
-/GET search?query=<query: string>&type=<artist | track>
+/GET search?query=<query>&type=<'artist' | 'track'>
 ```
 
 **Query parameters**
@@ -40,19 +42,34 @@ This route wraps the Spotify /search route (more details <a href="https://develo
 
 Currently the limit (number of items returned) is hardcoded to 5. This is due to only displaying the first 5 items in the search results on the frontend.
 
+In the `public-search` route, if cached data exists for the requested query and type, it is served directly from Redis.
+
 **Response**
 
-Depending on the *type* provided, the response can either be a `SpotifyArtistSearchResponse` or a `SpotifyTrackSearchResponse`. They both follow a structure like so:
+Depending on the *type* provided, the response can either be a `SpotifyApi.ArtistSearchResponse` or a `SpotifyApi.TrackSearchResponse`. 
 
-```ts
-export type SpotifyArtistSearchResponse = {
-  href: string;
-  items: Item[];
-  limit: number;
-  next: string | null;
-  offset: number;
-  previous: string | null;
-  total: number;
-};
+### `GET /recommendation && GET /public-recommendation`
+**Description**
+
+These routes wrap the Spotify /recommendations endpoint (details here). The `/recommendation route` is for logged-in users and the `/public-recommendation` route is designed for non-logged-in users and uses the client credentials flow. The public-recommendation route also applies a rate limiter. 
+
+**Usage**
 ```
-However, the Item type is different in each (one representing a Track, the other an Artist).
+GET /recommendation?limit=<number>&tags=<seed_ids>&recTargets=<targets>&seedType=<type>
+```
+
+**Query parameters**
+- *limit*: The number of recommendations to fetch. Spotify API allows a maximum value of 100.
+- *tags*: A comma-separated list of seed IDs to base recommendations on. The seed type is determined by the seedType parameter (either artist or track IDs).
+- *recTargets* (optional): A string of recommendation target attributes, formatted as attribute=value pairs, separated by commas. Supported attributes include acousticness, energy, danceability, tempo, etc. Example: energy=70,danceability=50.
+- *seedType*: Either 'Artist' or 'Track'
+
+**Response**
+Both routes return a `SpotifyApi.RecommendationsObject` object.
+
+## Middlewares
+### `GlobalLimiter.middleware()`
+Applies a rate limit to public-facing routes such as /public-search and /public-recommendation. Ensures backend resources are used efficiently and helps comply with Spotify's API rate limits.
+
+### `refreshTokenIfNeeded`
+A middleware that refreshes a user’s Spotify access token if it has expired. Ensures that private routes requiring authentication continue to function seamlessly.

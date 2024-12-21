@@ -12,6 +12,7 @@ const fetchSpotifyRecommendationsPublic = async(req: Request): Promise<SpotifyAp
     const { limit, tags: encodedTags, recTargets: encodedRecTargets, seedType } = req.query;
 
     const tags = decodeURIComponent(encodedTags as string);
+
     const recommendationString = decodeURIComponent(encodedRecTargets as string);
     const seedKey = seedType === 'Artist' ? 'seed_artists' : 'seed_tracks';
     const token = await getClientAccessToken();
@@ -55,11 +56,11 @@ const fetchSpotifyRecommendationsPublic = async(req: Request): Promise<SpotifyAp
     //   averagePopularity += data.tracks[i].popularity;
     // }
     // averagePopularity /= data.tracks.length;
-    // // console.log('Avg popularity: ', averagePopularity);
+    // console.log('Avg popularity: ', averagePopularity);
 
     return data;
   } catch (error) {
-    console.error('Error fetching search results:', error);
+    console.error(error);
     throw error;
   }
 };

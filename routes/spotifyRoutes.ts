@@ -9,6 +9,7 @@ import fetchSpotifySearchPrivate          from '../services/private/fetchSpotify
 import fetchSpotifyRecommendationsPublic  from '../services/public/fetchSpotifyRecommendationsPublic';
 import fetchSpotifyRecommendationsPrivate from '../services/private/fetchSpotifyRecommendationsPrivate';
 import refreshTokenIfNeeded               from '../middleware/refreshTokenIfNeeded';
+import addSongToLiked from '../services/private/addSongToLiked';
 
 const router = express.Router();
 
@@ -88,6 +89,21 @@ router.get('/public-recommendation', rateLimiter, async(req: Request, res: Respo
 
     return res.status(200).send(data);
   } catch (error) {
+    console.error(error);
+    return res.status(500).send(error);
+  }
+});
+
+router.put('/add-song', async(req: Request, res: Response) => {
+  if (!req.session.is_logged_in) return res.status(500).send("Must be logged in");
+  const { id } = req.body;
+
+  if (!id) return res.status(400).send("Track id is required");
+
+  try {
+    await addSongToLiked(req, id);
+    return res.status(200).send(`Track ${id} added succesfully`);
+  } catch(error) {
     console.error(error);
     return res.status(500).send(error);
   }

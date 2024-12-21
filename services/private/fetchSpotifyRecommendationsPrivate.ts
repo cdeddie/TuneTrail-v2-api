@@ -1,6 +1,11 @@
-import { Request}                         from 'express';
+import { Request} from 'express';
+import checkUserSavedTracks from './checkUserSavedTracks';
 
-const fetchSpotifyRecommendationsPrivate = async(req: Request): Promise<SpotifyApi.RecommendationsObject> => {
+interface LoggedInRecommendationsObject extends SpotifyApi.RecommendationsObject {
+  tracksLiked?: string[];
+}
+
+const fetchSpotifyRecommendationsPrivate = async(req: Request): Promise<LoggedInRecommendationsObject> => {
   try {
     if (!req.session.is_logged_in) {
       throw new Error('User must be logged in');
@@ -20,7 +25,7 @@ const fetchSpotifyRecommendationsPrivate = async(req: Request): Promise<SpotifyA
     const recommendationPairs = recommendationString.split(',');
     recommendationPairs.forEach(pair => {
       const [word, number] = pair.split('=');
-      if (number) queryParams += `&target_${word}=${encodeURIComponent(number)}`;
+      if (number) queryParams += `&${word}=${encodeURIComponent(number)}`;
     });
 
     // example url: https://api.spotify.com/v1/recommendations?limit=25&seed_artists=5K4W6rqBFWDnAN6FQUkS6x&target_energy=40 - %2C represents ,
@@ -38,16 +43,35 @@ const fetchSpotifyRecommendationsPrivate = async(req: Request): Promise<SpotifyA
     }
 
     const recommendations: SpotifyApi.RecommendationsObject = await response.json();
+    const songIds: Array<string> = new Array();
 
-    // let totalNull = 0;
-    // for (let i = 0; i < recommendations.tracks.length; i++) {
-    //   if (recommendations.tracks[i].preview_url === null || recommendations.tracks[i].preview_url === undefined) {
-    //     totalNull++;
-    //   }
+    for (let i = 0; i < recommendations.tracks.length; i++) {
+      const curr = recommendations.tracks[i];
+      songIds.push(curr.id);
+    }
+
+    const isLiked: Array<boolean> = await checkUserSavedTracks(req, songIds);
+    const tracksLiked: Array<string> = new Array();
+    for (let i = 0; i < recommendations.tracks.length; i++) {
+      const currTrack = recommendations.tracks[i];
+      if (isLiked[i]) {
+        tracksLiked.push(currTrack.id);
+      }
+    }
+
+    const customRecommendations: LoggedInRecommendationsObject = {
+      seeds: recommendations.seeds,
+      tracks: recommendations.tracks,
+      tracksLiked: tracksLiked,
+    }
+
+    // let pop = 0;
+    // for (let i = 0; i < customRecommendations.tracks.length; i++) {
+    //   pop += customRecommendations.tracks[i].popularity;
     // }
-    // console.log('Total no of null previews private: ', totalNull);
+    // console.log('Avg:', pop / customRecommendations.tracks.length);
 
-    return recommendations;
+    return customRecommendations;
   } catch (error) {
     console.error('Error fetching search results:', error);
     throw error;
