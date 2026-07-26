@@ -1,12 +1,11 @@
 import { TokenResponse }  from "../types/spotifyTokenResponse";
 
-const clientId = process.env.CLIENT_ID;
-const clientSecret = process.env.CLIENT_SECRET;
-
 let accessToken: string = "";
 let tokenExpiry: number | null = null;
 
 export const getClientAccessToken = async (): Promise<string> => {
+  const clientId = process.env.CLIENT_ID || "";
+  const clientSecret = process.env.CLIENT_SECRET || "";
   try {
     if (accessToken && tokenExpiry && Date.now() < tokenExpiry) {
       return accessToken;

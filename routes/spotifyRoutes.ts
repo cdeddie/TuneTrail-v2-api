@@ -15,6 +15,13 @@ const router = express.Router();
 
 const rateLimiter = GlobalLimiter.middleware();
 
+const formatError = (error: unknown) => {
+  if (error instanceof Error) {
+    return { error: error.message };
+  }
+  return { error: String(error) };
+};
+
 router.get('/top-50/:country', async (req: Request, res: Response) => {
   try {
     const country = req.params.country;
@@ -26,7 +33,8 @@ router.get('/top-50/:country', async (req: Request, res: Response) => {
 
     return res.status(200).send(jsonData);
   } catch (error) {
-    return res.status(500).send(error);
+    console.error(error);
+    return res.status(500).json(formatError(error));
   }
 });
 
@@ -37,7 +45,7 @@ router.get('/search', refreshTokenIfNeeded, async(req: Request, res: Response) =
     return res.status(200).send(data);
   } catch (error) {
     console.error(error);
-    return res.status(500).send(error);
+    return res.status(500).json(formatError(error));
   }
 });
 
@@ -46,19 +54,28 @@ router.get('/public-search', rateLimiter, async(req: Request, res: Response) => 
     const { query, type } = req.query;
     const cacheKey = `search:${query}:${type}`;
 
-    const cachedData = await redisClient.get(cacheKey);
-    if (cachedData) {
-      console.log('Serving search from redis');
-      return res.status(200).send(JSON.parse(cachedData));
+    try {
+      const cachedData = await redisClient.get(cacheKey);
+      if (cachedData) {
+        console.log('Serving search from redis');
+        return res.status(200).send(JSON.parse(cachedData));
+      }
+    } catch (redisErr) {
+      console.error('Redis cache get error:', redisErr);
     }
 
     const data = await fetchSpotifySearchPublic(req);
-    await redisClient.setEx(cacheKey, 360, JSON.stringify(data));
+
+    try {
+      await redisClient.setEx(cacheKey, 360, JSON.stringify(data));
+    } catch (redisErr) {
+      console.error('Redis cache set error:', redisErr);
+    }
 
     return res.status(200).send(data);
   } catch (error) {
     console.error(error);
-    return res.status(500).send(error);
+    return res.status(500).json(formatError(error));
   }
 });
 
@@ -69,7 +86,7 @@ router.get('/recommendation', refreshTokenIfNeeded, async(req: Request, res: Res
     return res.status(200).send(data);
   } catch (error) {
     console.error(error);
-    return res.status(500).send(error);
+    return res.status(500).json(formatError(error));
   }
 });
 
@@ -78,34 +95,43 @@ router.get('/public-recommendation', rateLimiter, async(req: Request, res: Respo
     const { limit, tags, recTargets, seedType } = req.query;
     const cacheKey = `recommendation:${limit}:${tags}:${recTargets}:${seedType}`;
 
-    const cachedData = await redisClient.get(cacheKey);
-    if (cachedData) {
-      console.log('Serving recommendation from redis');
-      return res.status(200).send(JSON.parse(cachedData));
+    try {
+      const cachedData = await redisClient.get(cacheKey);
+      if (cachedData) {
+        console.log('Serving recommendation from redis');
+        return res.status(200).send(JSON.parse(cachedData));
+      }
+    } catch (redisErr) {
+      console.error('Redis cache get error:', redisErr);
     }
 
     const data = await fetchSpotifyRecommendationsPublic(req);
-    await redisClient.setEx(cacheKey, 360, JSON.stringify(data));
+
+    try {
+      await redisClient.setEx(cacheKey, 360, JSON.stringify(data));
+    } catch (redisErr) {
+      console.error('Redis cache set error:', redisErr);
+    }
 
     return res.status(200).send(data);
   } catch (error) {
     console.error(error);
-    return res.status(500).send(error);
+    return res.status(500).json(formatError(error));
   }
 });
 
 router.put('/add-song', async(req: Request, res: Response) => {
-  if (!req.session.is_logged_in) return res.status(500).send("Must be logged in");
+  if (!req.session.is_logged_in) return res.status(401).json({ error: "Must be logged in" });
   const { id } = req.body;
 
-  if (!id) return res.status(400).send("Track id is required");
+  if (!id) return res.status(400).json({ error: "Track id is required" });
 
   try {
     await addSongToLiked(req, id);
     return res.status(200).send(`Track ${id} added succesfully`);
   } catch(error) {
     console.error(error);
-    return res.status(500).send(error);
+    return res.status(500).json(formatError(error));
   }
 });
 
