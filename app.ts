@@ -28,8 +28,10 @@ app.use(session({
 app.use(cors({
   origin: (origin, callback) => {
     const allowedOrigins = [
+      'https://tunetrail.cdeddie.dev',
       'https://tunetrail.site', 
-      'https://staging.tunetrail.site'
+      'https://staging.tunetrail.site',
+      ...(process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : [])
     ];
 
     if (process.env.NODE_ENV === 'development') {
