@@ -3,16 +3,18 @@
 
 import { TokenResponse } from "../types/spotifyTokenResponse"
 
-const {
-  CLIENT_ID: clientId,
-  CLIENT_SECRET: clientSecret,
-  REDIRECT_URI: redirectUri,
-} = process.env;
-
 const fetchSpotifyToken = async(code: string | null): Promise<TokenResponse> => {
+  const clientId = process.env.CLIENT_ID || '';
+  const clientSecret = process.env.CLIENT_SECRET || '';
+  const redirectUri = process.env.REDIRECT_URI || 'https://tunetrail.cdeddie.dev/api/auth/callback';
+
+  if (!clientId || !clientSecret) {
+    throw new Error(`Spotify CLIENT_ID or CLIENT_SECRET is missing in environment variables.`);
+  }
+
   const params = new URLSearchParams({
     code: code || '',
-    redirect_uri: redirectUri || 'http://localhost:3443/api/auth/callback',
+    redirect_uri: redirectUri,
     grant_type: 'authorization_code'
   });
 
@@ -26,7 +28,8 @@ const fetchSpotifyToken = async(code: string | null): Promise<TokenResponse> => 
   });
 
   if (!response.ok) {
-    throw new Error(`HTTP error, status: ${response.status}`);
+    const errorText = await response.text();
+    throw new Error(`Spotify token exchange error (${response.status}): ${errorText}`);
   }
 
   return response.json();

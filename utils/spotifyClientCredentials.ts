@@ -6,6 +6,11 @@ let tokenExpiry: number | null = null;
 export const getClientAccessToken = async (): Promise<string> => {
   const clientId = process.env.CLIENT_ID || "";
   const clientSecret = process.env.CLIENT_SECRET || "";
+
+  if (!clientId || !clientSecret) {
+    throw new Error(`Spotify CLIENT_ID or CLIENT_SECRET is missing in environment variables. Please configure .env on the server.`);
+  }
+
   try {
     if (accessToken && tokenExpiry && Date.now() < tokenExpiry) {
       return accessToken;
@@ -23,7 +28,8 @@ export const getClientAccessToken = async (): Promise<string> => {
     });
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status} (${response.statusText})`);
+      const errorText = await response.text();
+      throw new Error(`Spotify Token API error (${response.status}): ${errorText}`);
     }
 
     const token_data = await response.json() as TokenResponse;
