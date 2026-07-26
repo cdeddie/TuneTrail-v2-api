@@ -7,13 +7,13 @@ import { CallbackQueryParams }                from '../types/callbackQueryParams
 import { fetchSpotifyToken }                  from '../utils/fetchSpotifyToken';
 import { fetchSpotifyUser }                   from '../utils/fetchSpotifyUser';
 
-const {
-  CLIENT_ID: clientId,
-  CLIENT_SECRET: clientSecret,
-  REDIRECT_URI: redirectUri,
-  STATE_KEY: stateKey,
-  SCOPE: scope
-} = process.env;
+const getEnv = () => ({
+  clientId: process.env.CLIENT_ID || '',
+  clientSecret: process.env.CLIENT_SECRET || '',
+  redirectUri: process.env.REDIRECT_URI || '',
+  stateKey: process.env.STATE_KEY || 'spotify_auth_state',
+  scope: process.env.SCOPE || ''
+});
 
 declare module 'express-session' {
   interface SessionData {
@@ -35,11 +35,12 @@ const generateRandomString = (length: number) => {
 };
 
 router.get('/login', (req: Request, res: Response) => {
+  const { clientId, redirectUri, stateKey, scope } = getEnv();
   const state = JSON.stringify({
     state: generateRandomString(16),
     currentUrl: req.query.redirectUrl,
   });
-  res.cookie(stateKey as string, state);
+  res.cookie(stateKey, state);
 
   const redirectUrl = 'https://accounts.spotify.com/authorize?' +
   querystring.stringify({
@@ -64,9 +65,10 @@ const updateSession = (req: Request, tokenResponse: TokenResponse, spotifyData: 
 
 // Exchange code for access token, requests refresh and access tokens after checking state param
 router.get('/callback', async (req: Request<{}, {}, {}, CallbackQueryParams>, res: Response) => {
+  const { stateKey } = getEnv();
   const code = req.query.code || null;
   const state = req.query.state || null;
-  const storedState = req.cookies ? req.cookies[stateKey as string] : null;
+  const storedState = req.cookies ? req.cookies[stateKey] : null;
 
   if (state === null || state !== storedState) {
     // redirect to home page ( adjust later )
@@ -74,7 +76,7 @@ router.get('/callback', async (req: Request<{}, {}, {}, CallbackQueryParams>, re
     return;
   } 
 
-  res.clearCookie(stateKey as string);
+  res.clearCookie(stateKey);
 
   const parsedState = JSON.parse(state);
 
@@ -97,6 +99,7 @@ router.get('/callback', async (req: Request<{}, {}, {}, CallbackQueryParams>, re
 });
 
 router.get('/refresh_token', async (req: Request, res: Response) => {
+  const { clientId, clientSecret } = getEnv();
   const refreshToken = req.session.refresh_token;
 
   const params = new URLSearchParams({

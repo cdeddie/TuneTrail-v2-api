@@ -1,14 +1,16 @@
+import 'dotenv/config';
 import express, { Application }   from 'express';
 import session                    from 'express-session';
 import cookieparser               from 'cookie-parser';
 import cors                       from 'cors';
-import dotenv                     from 'dotenv';
 
 const app: Application = express();
-dotenv.config();
 
 import { router as spotifyRouter }  from './routes/spotifyRoutes';
 import { router as authRouter }     from './routes/auth';
+
+const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3443;
+const SESSION_SECRET = process.env.SESSION_SECRET || 'default_tunetrail_session_secret';
 
 app.use(express.json());
 app.use(cookieparser());
@@ -16,7 +18,7 @@ app.use(cookieparser());
 app.enable('trust proxy');
 
 app.use(session({
-  secret: process.env.SESSION_SECRET!,
+  secret: SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
   cookie: { 
@@ -49,4 +51,7 @@ app.use(cors({
 app.use('/api/', spotifyRouter);
 app.use('/api/auth', authRouter);
 
-app.listen(process.env.PORT);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`TuneTrail API listening on port ${PORT}`);
+});
+
